@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: DynamoDB tables for Restaurant Inventory Manager
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+Resources:
+
+  InventoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Inventory"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: ingredient
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: ingredient_name
+          KeyType: HASH
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  MenuTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Menu"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: menu_item
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: menu_item
+          KeyType: HASH
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  SalesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Sales"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: sale_id
+          AttributeType: S
+
+        - AttributeName: dayOfWeek
+          AttributeType: S
+
+        - AttributeName: date
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: sale_id
+          KeyType: HASH
+
+      GlobalSecondaryIndexes:
+        - IndexName: SalesByDayofWeek
+          KeySchema:
+            - AttributeName: dayOfWeek
+              KeyType: HASH
+            - AttributeName: date
+              KeyType: RANGE
+
+          Projection:
+            ProjectionType: ALL
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+Outputs:
+
+  InventoryTableName:
+    Description: Inventory table name
+    Value: !Ref InventoryTable
+
+  MenuTableName:
+    Description: Menu table name
+    Value: !Ref MenuTable
+
+  SalesTableName:
+    Description: Sales table name
+    Value: !Ref SalesTable
+
+  SalesByDayOfWeekIndex:
+    Description: Sales forecasting GSI
+    Value: SalesByDayOfWeek
