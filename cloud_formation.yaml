@@ -100,6 +100,21 @@ Resources:
       Tags:
         - Key: Service
           Value: InventoryManager
+  
+  ForecastQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${Environment}-forecast-queue"
+
+      VisibilityTimeout: 30
+
+      MessageRetentionPeriod: 345600 # 4 days
+
+      ReceiveMessageWaitTimeSeconds: 20 # long polling
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
 
 Outputs:
 
@@ -118,3 +133,9 @@ Outputs:
   SalesByDayOfWeekIndex:
     Description: Sales forecasting GSI
     Value: SalesByDayOfWeek
+
+  ForecastQueueUrl:
+    Value: !Ref ForecastQueue
+
+  ForecastQueueArn:
+    Value: !GetAtt ForecastQueue.Arn

@@ -63,6 +63,9 @@ wheels = [
 dynamodb = [
     { name = "mypy-boto3-dynamodb" },
 ]
+sqs = [
+    { name = "mypy-boto3-sqs" },
+]
 
 [[package]]
 name = "botocore"
@@ -403,6 +406,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mypy-boto3-sqs"
+version = "1.43.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/1e/226725696a99c7dadfe8ebfba01575107fa15146029a7fb0082c650d8689/mypy_boto3_sqs-1.43.0.tar.gz", hash = "sha256:3ec8e1e651e830affcf7fe151b2e3090b8ea98d73cb069053b09ca4c7f4c8636", size = 23318, upload-time = "2026-04-29T23:06:17.614Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f2/5e/5d4deb1ee7aec7fcdddbca616c623f07bfc72a1cd3e80b0e2a0c39904fae/mypy_boto3_sqs-1.43.0-py3-none-any.whl", hash = "sha256:f90225486756a4041db9f056967cb3cee202264bbe57682031c1e94d83e8ca39", size = 33604, upload-time = "2026-04-29T23:06:15.339Z" },
+]
+
+[[package]]
 name = "pydantic"
 version = "2.13.4"
 source = { registry = "https://pypi.org/simple" }
@@ -561,7 +573,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
-    { name = "boto3-stubs", extra = ["dynamodb"] },
+    { name = "boto3-stubs", extra = ["dynamodb", "sqs"] },
     { name = "botocore" },
     { name = "fastapi", extra = ["standard"] },
 ]
@@ -569,7 +581,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.43.14" },
-    { name = "boto3-stubs", extras = ["dynamodb"], specifier = ">=1.43.14" },
+    { name = "boto3-stubs", extras = ["dynamodb", "sqs"], specifier = ">=1.43.14" },
     { name = "botocore", specifier = ">=1.43.14" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
 ]
