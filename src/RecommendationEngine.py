@@ -7,6 +7,7 @@ from mypy_boto3_sqs.client import SQSClient
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from src.DemandForecaster import DemandForecaster
 import boto3
+from typing import Dict, List
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
@@ -34,36 +35,29 @@ class RecommendationEngine:
         )
 
     def generate_recommendations(self, predicted_sales: dict[str, float]) -> dict:
-        ingredient_demand = self.calculate_ingredient_demand(predicted_sales)
-        inventory = self.get_inventory_by_ingredient(ingredient_demand.keys())
+        ingredient_demand: dict[str, Decimal] = self.calculate_ingredient_demand(predicted_sales)
+        inventory: Dict[str, dict] = self.get_full_inventory(list(predicted_sales.keys()))
 
         message = {
             "need": {},
             "expiring": {}
         }
 
-        tomorrow = datetime.now(timezone.utc).date() + timedelta(days=1)
+        tomorrow: datetime = datetime.now(timezone.utc).date() + timedelta(days=1)
 
-        for ingredient_name, required_quantity in ingredient_demand.items():
-            inventory_item = inventory.get(ingredient_name)
-
-            if inventory_item is None:
-                message["need"][ingredient_name] = float(required_quantity)
-                continue
-
-            available_quantity = Decimal(str(inventory_item.get("quantity", 0)))
+        for ingredient, inventory_item in inventory.items():
+            required_amnt: Decimal = ingredient_demand.get(ingredient)
+            available_amnt = Decimal(inventory_item.get("quantity", 0))
             expiration_date = inventory_item.get("expiration_date")
 
-            if available_quantity < required_quantity:
-                shortage = required_quantity - available_quantity
-                message["need"][ingredient_name] = float(shortage)
+            if available_amnt < required_amnt:
+                shortage = required_amnt - available_amnt
+                message["need"][ingredient] = float(shortage)
+            elif available_amnt == required_amnt:
                 continue
-
-            if self.expires_within_one_day(expiration_date, tomorrow):
-                delta = available_quantity - required_quantity
-
-                if delta > 0:
-                    message["expiring"][ingredient_name] = float(delta)
+            elif self.expires_within_one_day(expiration_date, tomorrow):
+                delta = available_amnt - required_amnt
+                message["expiring"][ingredient] = float(delta)
 
         return message
 
@@ -99,26 +93,31 @@ class RecommendationEngine:
         return item.get("ingredients", {})
 
 
-    def get_inventory_by_ingredient(self, ingredient_names) -> dict:
+    def get_full_inventory(self, ingredients: List[str]) -> Dict[str, dict]:
         inventory = {}
 
-        for ingredient_name in ingredient_names:
+        for ingredient in ingredients:
             response = self.inventory_table.get_item(
-                Key={"ingredient_name": ingredient_name}
+                Key={"ingredient": ingredient}
             )
 
             item = response.get("Item")
 
             if item:
-                inventory[ingredient_name] = item
-
+                inventory[ingredient] = item
+            else:
+                inventory[ingredient] = {
+                    "ingredient": ingredient,
+                    "quantity": 0,
+                    "unit": None,
+                    "expiration_date": None
+                }
         return inventory
 
 
-    def expires_within_one_day(expiration_date: str | None, forecast_date) -> bool:
+    def expires_within_one_day(expiration_date: str | None, ref_date: datetime) -> bool:
         if not expiration_date:
             return False
 
         expiration = datetime.fromisoformat(expiration_date).date()
-
-        return expiration <= forecast_date + timedelta(days=1)
+        return expiration <= ref_date + timedelta(days=1)

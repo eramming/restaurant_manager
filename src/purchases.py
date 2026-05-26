@@ -3,7 +3,7 @@ import boto3
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from fastapi import HTTPException
 from botocore.exceptions import ClientError
-from inventory_manager import PurchaseRequest
+from inventory_manager_api import PurchaseRequest
 
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")

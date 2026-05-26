@@ -1,6 +1,6 @@
 import os
 from uuid import uuid4
-from inventory_manager import SaleRequest, MenuItem
+from inventory_manager_api import SaleRequest, MenuItem
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from typing import Dict, List
 import boto3
