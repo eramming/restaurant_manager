@@ -115,6 +115,22 @@ Resources:
       Tags:
         - Key: Service
           Value: InventoryManager
+  
+  PricingReportTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Environment}-pricing-report-topic"
+      DisplayName: Pricing Report Alerts
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  PricingReportEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref PricingReportTopic
+      Protocol: email
+      Endpoint: eramming14@gmail.com
 
 Outputs:
 
@@ -139,3 +155,7 @@ Outputs:
 
   ForecastQueueArn:
     Value: !GetAtt ForecastQueue.Arn
+
+  PricingReportTopicArn:
+    Description: SNS topic ARN for pricing report notifications
+    Value: !Ref PricingReportTopic

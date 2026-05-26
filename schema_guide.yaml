@@ -1,0 +1,21 @@
+inventory-db:
+  - ingredient
+  - quantity
+  - unit
+  - latest_price
+  - expiration_date
+
+
+menu-db:
+  - menu_item
+  - recipe:
+      - ingredient
+      - quantity
+
+
+sales-db:
+  - sale_id
+  - dish
+  - amount
+  - dayOfWeek
+  - date

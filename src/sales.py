@@ -1,6 +1,6 @@
 import os
 from uuid import uuid4
-from inventory_manager_api import SaleRequest, MenuItem
+from inventory_manager_api import Sale, MenuItem
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from typing import Dict, List
 import boto3
@@ -19,7 +19,7 @@ menu_table: Table = dynamodb.Table(MENU_TABLE)
 sales_table: Table = dynamodb.Table(SALES_TABLE)
 
 
-def handle_sale(request: SaleRequest) -> dict:
+def handle_sale(request: Sale) -> dict:
     for item in request.order:
         dish_name = item.name.lower()
         amount = item.quantity_sold

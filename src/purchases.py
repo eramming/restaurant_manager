@@ -3,7 +3,7 @@ import boto3
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from fastapi import HTTPException
 from botocore.exceptions import ClientError
-from inventory_manager_api import PurchaseRequest
+from inventory_manager_api import PurchasedIngrs
 
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
@@ -12,7 +12,7 @@ dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
 inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
 
 
-def handle_new_purchases(purchase: PurchaseRequest):
+def handle_new_purchases(purchase: PurchasedIngrs):
     for ingredient in purchase.ingredients:
         ingr_key = ingredient.name.lower()
 
@@ -22,7 +22,8 @@ def handle_new_purchases(purchase: PurchaseRequest):
                 UpdateExpression="""
                     ADD quantity :quantity
                     SET unit = :unit,
-                        expiration_date = :expiration_date
+                        expiration_date = :expiration_date,
+                        latest_price = :latest_price
                 """,
                 ExpressionAttributeValues={
                     ":quantity": ingredient.quantity,
@@ -32,6 +33,7 @@ def handle_new_purchases(purchase: PurchaseRequest):
                         if ingredient.expiration_date
                         else None
                     ),
+                    ":latest_price": ingredient.latest_price
                 }
             )
         except ClientError:

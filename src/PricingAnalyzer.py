@@ -35,53 +35,32 @@ from src.KrogerClient import KrogerClient, PriceResult
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
-SNS_TOPIC_ARN = os.getenv("SNS_TOPIC_ARN", None)
+SNS_ARN = os.getenv("PRICE_REPORT_SNS_ARN", None)
 
 class PricingAnalyzer:
 
     def __init__(self):
         self.sns: SNSClient = boto3.client("sns")
-        self.sns_topic_arn: str = SNS_TOPIC_ARN
+        self.sns_topic_arn: str = SNS_ARN
         dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
         self.inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
         self.menu_table: Table = dynamodb.Table(MENU_TABLE)
         self.kroger_client: KrogerClient = KrogerClient()
         
     
-    def analyze(self, recommendations: dict[str, dict[str, float | int]]) -> dict[str, Any]:
-        """
-        Main entrypoint.
-
-        Expected recommendations:
-        {
-            "need": {"tomatoes": 7, "squash": 3},
-            "expiring": {"lettuce": 5}
-        }
-        """
-        needed_report = self._analyze_needed_ingredients(
-            recommendations.get("need", {})
-        )
-
-        expiring_report = self._analyze_expiring_ingredients(
-            recommendations.get("expiring", {})
-        )
+    def analyze(self, recommendations: dict[str, dict[str, float]]) -> dict[str, Any]:
+        needed_report = self._analyze_needed_ingredients(recommendations.get("need", {}))
+        expiring_report = self._analyze_expiring_ingredients(recommendations.get("expiring", {}))
 
         final_report = {
             "neededPriceChanges": needed_report,
             "expiringLosses": expiring_report,
         }
 
-        self._send_sns_message(
-            subject="Inventory Pricing Analysis",
-            message=final_report,
-        )
-
+        self._send_sns_message(subject="Inventory Pricing Analysis", message=final_report)
         return final_report
 
-    def _analyze_needed_ingredients(
-        self,
-        needed: dict[str, float | int],
-    ) -> list[dict[str, Any]]:
+    def _analyze_needed_ingredients(self, needed: dict[str, float]) -> list[dict[str, Any]]:
         report = []
 
         for ingredient, quantity in needed.items():
@@ -148,15 +127,13 @@ class PricingAnalyzer:
 
     def _get_previous_price(self, ingredient: str) -> Decimal | None:
         response = self.inventory_table.get_item(
-            Key={"ingredient_name": ingredient}
+            Key={"ingredient": ingredient}
         )
 
         item = response.get("Item")
-
         if not item:
             return None
-
-        previous_price = item.get("previous_unit_price")
+        previous_price = item.get("latest_price")
 
         if previous_price is None:
             return None
