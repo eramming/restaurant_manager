@@ -4,14 +4,12 @@ import os
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 import boto3
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import timedelta
 from boto3.dynamodb.conditions import Key
-import json
 from typing import List
 
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 SALES_TABLE = os.getenv("SALES_TABLE", "dev-Sales")
-
 
 
 class DemandForecaster:
@@ -75,7 +73,7 @@ class DemandForecaster:
         cutoff_day: datetime = self.generate_cutoff_day(num_samples)
         sales_items: list = self.get_sales(day_of_week, cutoff_day)
 
-        menu_items: List[str] = self.get_all_menu_items(self)
+        menu_items: List[str] = self.get_all_menu_items()
 
         totals_by_dish = defaultdict(float)
 

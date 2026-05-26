@@ -6,9 +6,10 @@ import os
 from mypy_boto3_sqs.client import SQSClient
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from src.DemandForecaster import DemandForecaster
-
 import boto3
 
+INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
+MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 FORECAST_QUEUE = os.getenv("FORECAST_QUEUE_URL", None)
 
 
@@ -16,7 +17,9 @@ class RecommendationEngine:
 
     def __init__(self):
         self.sqs: SQSClient = boto3.client("sqs")
+        dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
         self.inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
+        self.menu_table: Table = dynamodb.Table(MENU_TABLE)
 
     def recommend(self, predicted_sales: dict) -> dict:
         predicted_sales: dict = DemandForecaster().predict_tmr_sales()
@@ -30,17 +33,9 @@ class RecommendationEngine:
             MessageBody=json.dumps(payload)
         )
 
-
-    def build_ingredient_forecast_message(self, predicted_sales: dict[str, float]) -> dict:
-        ingredient_demand = self.calculate_ingredient_demand(
-            self,
-            predicted_sales
-        )
-
-        inventory = self.get_inventory_by_ingredient(
-            self,
-            ingredient_demand.keys()
-        )
+    def generate_recommendations(self, predicted_sales: dict[str, float]) -> dict:
+        ingredient_demand = self.calculate_ingredient_demand(predicted_sales)
+        inventory = self.get_inventory_by_ingredient(ingredient_demand.keys())
 
         message = {
             "need": {},
@@ -64,7 +59,7 @@ class RecommendationEngine:
                 message["need"][ingredient_name] = float(shortage)
                 continue
 
-            if expires_within_one_day(expiration_date, tomorrow):
+            if self.expires_within_one_day(expiration_date, tomorrow):
                 delta = available_quantity - required_quantity
 
                 if delta > 0:
@@ -80,7 +75,7 @@ class RecommendationEngine:
             if predicted_quantity <= 0:
                 continue
 
-            recipe = get_recipe(self, menu_item)
+            recipe = self.get_recipe(self, menu_item)
 
             for ingredient_name, amount_per_menu_item in recipe.items():
                 ingredient_demand[ingredient_name] += (
