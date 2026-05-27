@@ -5,6 +5,7 @@ from typing import List
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 import random
+from decimal import Decimal
 
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
@@ -18,54 +19,57 @@ sales_table: Table = dynamodb.Table(SALES_TABLE)
 today: datetime = datetime.now(timezone.utc).date()
 tomorrow: datetime = today + timedelta(days=1)
 
+def decimal(x: float) -> Decimal:
+    return Decimal(str(x))
+
 inventory = [
     {
         "ingredient": "noodles",
         "quantity": 25,
         "unit": "boxes",
-        "latest_price": 3.25,
+        "latest_price": decimal(3.25),
         "expiration_date": tomorrow.strftime("YYYY-MM-dd")
     },
     {
         "ingredient": "sauce",
         "quantity": 4,
         "unit": "jars",
-        "latest_price": 4.75,
+        "latest_price": decimal(4.75),
         "expiration_date": "2026-06-12"
     },
     {
         "ingredient": "cheese",
         "quantity": 5,
         "unit": "lb",
-        "latest_price": 4.00,
+        "latest_price": decimal(4.00),
         "expiration_date": "2026-06-12"
     },
     {
         "ingredient": "pepperoni",
         "quantity": 3,
         "unit": "lb",
-        "latest_price": 7.50,
+        "latest_price": decimal(7.50),
         "expiration_date": "2026-06-12"
     },
     {
         "ingredient": "ham",
         "quantity": 7,
         "unit": "lb",
-        "latest_price": 9.50,
+        "latest_price": decimal(9.50),
         "expiration_date": "2026-06-12"
     },
     {
         "ingredient": "salami",
         "quantity": 30,
         "unit": "lb",
-        "latest_price": 11.25,
+        "latest_price": decimal(11.25),
         "expiration_date": "2026-06-12"
     },
     {
         "ingredient": "bread",
         "quantity": 12,
         "unit": "loaf",
-        "latest_price": 3,
+        "latest_price": decimal(3),
         "expiration_date": "2026-06-12"
     }
 ]
