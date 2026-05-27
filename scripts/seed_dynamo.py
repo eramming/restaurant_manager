@@ -16,7 +16,7 @@ menu_table: Table = dynamodb.Table(MENU_TABLE)
 sales_table: Table = dynamodb.Table(SALES_TABLE)
 
 today: datetime = datetime.now(timezone.utc).date()
-tomorrow: datetime = today + timedelta(day=1)
+tomorrow: datetime = today + timedelta(days=1)
 
 inventory = [
     {
@@ -71,7 +71,7 @@ inventory = [
 ]
 
 sale_history = []
-date = today - timedelta(day=28)
+date = today - timedelta(days=28)
 while date != today:
     sales_per_day: int = random.randint(0, 4)
     for sale in range(sales_per_day):
@@ -83,7 +83,7 @@ while date != today:
             "dayOfWeek": date.strftime("%A").lower(),
             "date": date.strftime("YYYY-MM-dd")
         })
-    date = date + timedelta(day=1)
+    date = date + timedelta(days=1)
 
 menu = [
     {
