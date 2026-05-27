@@ -81,7 +81,7 @@ while date != today:
     for sale in range(sales_per_day):
         dish: str = random.choice(["spaghetti", "pizza", "italian_sub"])
         sale_history.append({
-            "sale_id": uuid4(),
+            "sale_id": str(uuid4()),
             "dish": dish,
             "amount": 1,
             "dayOfWeek": date.strftime("%A").lower(),
