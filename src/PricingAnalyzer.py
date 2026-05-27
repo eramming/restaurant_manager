@@ -6,7 +6,7 @@ from typing import Any
 import boto3
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_sns.client import SNSClient
-from src.KrogerClient import KrogerClient, PriceResult
+from KrogerClient import KrogerClient, PriceResult
 
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")

@@ -39,7 +39,7 @@ Resources:
           Value: InventoryManager
         - Key: environment
           Value: !Ref Environment
-      UserData: &SharedUserData
+      UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
           set -euxo pipefail
@@ -81,7 +81,30 @@ Resources:
           Value: RecommendationEngine
         - Key: environment
           Value: !Ref Environment
-      UserData: *SharedUserData
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          aws secretsmanager get-secret-value \
+            --secret-id github-ssh-key \
+            --query SecretString \
+            --output text > /root/.ssh/id_ed25519
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
 
   PricingAnalyzerInstance:
     Type: AWS::EC2::Instance
@@ -100,7 +123,30 @@ Resources:
           Value: PricingAnalyzer
         - Key: environment
           Value: !Ref Environment
-      UserData: *SharedUserData
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          aws secretsmanager get-secret-value \
+            --secret-id github-ssh-key \
+            --query SecretString \
+            --output text > /root/.ssh/id_ed25519
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
 
   InventoryTable:
     Type: AWS::DynamoDB::Table

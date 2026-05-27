@@ -2,7 +2,7 @@ import json
 import os
 import time
 import boto3
-from src.PricingAnalyzer import PricingAnalyzer
+from PricingAnalyzer import PricingAnalyzer
 from mypy_boto3_sqs.client import SQSClient
 
 FORECAST_QUEUE: str = os.getenv("FORECAST_QUEUE_URL", None)

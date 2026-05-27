@@ -4,7 +4,7 @@ from typing import List
 from datetime import date
 from decimal import Decimal
 
-from src.sales import handle_sale
+from sales import handle_sale
 from purchases import handle_new_purchases
 
 

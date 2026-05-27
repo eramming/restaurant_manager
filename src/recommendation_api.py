@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.RecommendationEngine import RecommendationEngine
+from RecommendationEngine import RecommendationEngine
 
 app = FastAPI(title="Demand Forecasting Service")
 
