@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: DynamoDB tables for Restaurant Inventory Manager
+Description: Cloud Services for Restaurant Inventory Manager
 
 Parameters:
   Environment:
@@ -11,6 +11,96 @@ Parameters:
       - prod
 
 Resources:
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and app traffic
+      VpcId: vpc-0957698fb6be82426
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0 # tighten this to your IP for real use
+
+  InventoryManagerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-InventoryManager"
+        - Key: service
+          Value: InventoryManager
+        - Key: environment
+          Value: !Ref Environment
+      UserData: &SharedUserData
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          aws secretsmanager get-secret-value \
+            --secret-id github-ssh-key \
+            --query SecretString \
+            --output text > /root/.ssh/id_ed25519
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
+
+  RecommendationEngineInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-RecommendationEngine"
+        - Key: service
+          Value: RecommendationEngine
+        - Key: environment
+          Value: !Ref Environment
+      UserData: *SharedUserData
+
+  PricingAnalyzerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-PricingAnalyzer"
+        - Key: service
+          Value: PricingAnalyzer
+        - Key: environment
+          Value: !Ref Environment
+      UserData: *SharedUserData
 
   InventoryTable:
     Type: AWS::DynamoDB::Table
@@ -23,7 +113,7 @@ Resources:
           AttributeType: S
 
       KeySchema:
-        - AttributeName: ingredient_name
+        - AttributeName: ingredient
           KeyType: HASH
 
       PointInTimeRecoverySpecification:
@@ -81,7 +171,7 @@ Resources:
           KeyType: HASH
 
       GlobalSecondaryIndexes:
-        - IndexName: SalesByDayofWeek
+        - IndexName: SalesByDayOfWeek
           KeySchema:
             - AttributeName: dayOfWeek
               KeyType: HASH
@@ -132,6 +222,59 @@ Resources:
       Protocol: email
       Endpoint: eramming14@gmail.com
 
+
+  AppEc2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Environment}-restaurant-app-ec2-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RestaurantAppAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: DynamoDbAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:*
+                Resource:
+                  - !GetAtt InventoryTable.Arn
+                  - !GetAtt MenuTable.Arn
+                  - !GetAtt SalesTable.Arn
+                  - !Sub "${SalesTable.Arn}/index/*"
+
+              - Sid: SqsAccess
+                Effect: Allow
+                Action:
+                  - sqs:*
+                Resource: !GetAtt ForecastQueue.Arn
+
+              - Sid: SnsAccess
+                Effect: Allow
+                Action:
+                  - sns:*
+                Resource: !Ref PricingReportTopic
+
+              - Sid: GithubSshSecretsAccess
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:github-ssh-key*"
+
+  AppEc2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${Environment}-restaurant-app-instance-profile"
+      Roles:
+        - !Ref AppEc2Role
+
+
 Outputs:
 
   InventoryTableName:
@@ -159,3 +302,27 @@ Outputs:
   PricingReportTopicArn:
     Description: SNS topic ARN for pricing report notifications
     Value: !Ref PricingReportTopic
+
+  InventoryManagerPublicIP:
+    Description: Public IP of InventoryManager instance
+    Value: !GetAtt InventoryManagerInstance.PublicIp
+
+  RecommendationEnginePublicIP:
+    Description: Public IP of RecommendationEngine instance
+    Value: !GetAtt RecommendationEngineInstance.PublicIp
+
+  PricingAnalyzerPublicIP:
+    Description: Public IP of PricingAnalyzer instance
+    Value: !GetAtt PricingAnalyzerInstance.PublicIp
+
+  InventoryManagerInstanceId:
+    Description: Instance ID
+    Value: !Ref InventoryManagerInstance
+
+  RecommendationEngineInstanceId:
+    Description: Instance ID
+    Value: !Ref RecommendationEngineInstance
+
+  PricingAnalyzerInstanceId:
+    Description: Instance ID
+    Value: !Ref PricingAnalyzerInstance
