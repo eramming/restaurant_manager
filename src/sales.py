@@ -93,6 +93,6 @@ def record_sales(order: List[MenuItem]) -> None:
                     'dish': dish,
                     'amount': amount,
                     'dayOfWeek': day_of_wk,
-                    'date': now.strftime("%d%m%Y")
+                    'date': now.strftime("%d-%m-%Y")
                 }
             )

@@ -28,7 +28,7 @@ inventory = [
         "quantity": 25,
         "unit": "boxes",
         "latest_price": decimal(3.25),
-        "expiration_date": tomorrow.strftime("YYYY-MM-dd")
+        "expiration_date": tomorrow.strftime("%Y-%M-%d")
     },
     {
         "ingredient": "sauce",
@@ -85,7 +85,7 @@ while date != today:
             "dish": dish,
             "amount": 1,
             "dayOfWeek": date.strftime("%A").lower(),
-            "date": date.strftime("YYYY-MM-dd")
+            "date": date.strftime("%Y-%M-%d")
         })
     date = date + timedelta(days=1)
 
