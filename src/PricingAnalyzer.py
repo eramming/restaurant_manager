@@ -1,33 +1,9 @@
-"""
-PricingAnalyzer.py
-
-Consumes ingredient recommendations like:
-{
-    "need": {"tomatoes": 7, "squash": 3},
-    "expiring": {"lettuce": 5}
-}
-
-For needed ingredients:
-- Looks up current unit price through the Kroger API.
-- Compares current price against the previous stored ingredient price.
-- Sends an SNS notification with price differences.
-
-For expiring ingredients:
-- Looks up current unit price through the Kroger API.
-- Calculates potential loss: expiring quantity * unit price.
-- Randomly selects a menu item that uses that ingredient.
-- Recommends a discount equal to 75% of potential loss.
-- Sends an SNS notification to a simulated end user.
-"""
-
 from __future__ import annotations
 import json
 import os
-import random
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any
 import boto3
-from boto3.dynamodb.conditions import Attr
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_sns.client import SNSClient
 from src.KrogerClient import KrogerClient, PriceResult
@@ -72,14 +48,11 @@ class PricingAnalyzer:
 
             if previous_price is not None:
                 price_difference = self._money(price_result.unit_price - previous_price)
+                percent_change = self._money(
+                    (price_difference / previous_price) * Decimal("100")
+                )
 
-                if previous_price > 0:
-                    percent_change = self._money(
-                        (price_difference / previous_price) * Decimal("100")
-                    )
-
-            self._update_previous_price(ingredient, price_result.unit_price)
-
+            self._update_latest_price(ingredient, price_result.unit_price)
             report.append(
                 {
                     "ingredient": ingredient,
@@ -94,20 +67,13 @@ class PricingAnalyzer:
 
         return report
 
-    def _analyze_expiring_ingredients(
-        self,
-        expiring: dict[str, float | int],
-    ) -> list[dict[str, Any]]:
+    def _analyze_expiring_ingredients(self, expiring: dict[str, float]) -> list[dict[str, Any]]:
         report = []
 
         for ingredient, quantity in expiring.items():
             quantity_decimal = Decimal(str(quantity))
-            price_result = self._get_kroger_unit_price(ingredient)
-
+            price_result: PriceResult = self.kroger_client.price_of(ingredient)
             potential_loss = self._money(quantity_decimal * price_result.unit_price)
-            recommended_discount = self._money(potential_loss * Decimal("0.75"))
-
-            menu_item = self._find_random_menu_item_using_ingredient(ingredient)
 
             report.append(
                 {
@@ -115,8 +81,6 @@ class PricingAnalyzer:
                     "quantityExpiring": float(quantity_decimal),
                     "currentUnitPrice": float(price_result.unit_price),
                     "potentialLoss": float(potential_loss),
-                    "recommendedMenuItem": menu_item,
-                    "recommendedDiscount": float(recommended_discount),
                     "matchedProduct": price_result.product_description,
                 }
             )
@@ -140,44 +104,14 @@ class PricingAnalyzer:
 
         return Decimal(str(previous_price))
 
-    def _update_previous_price(self, ingredient: str, unit_price: Decimal) -> None:
+    def _update_latest_price(self, ingredient: str, unit_price: Decimal) -> None:
         self.inventory_table.update_item(
-            Key={"ingredient_name": ingredient},
-            UpdateExpression="SET previous_unit_price = :price",
+            Key={"ingredient": ingredient},
+            UpdateExpression="SET latest_price = :price",
             ExpressionAttributeValues={
                 ":price": unit_price,
-            },
+            }
         )
-
-    def _find_random_menu_item_using_ingredient(self, ingredient: str) -> str | None:
-        """
-        Finds menu items whose ingredients map contains the ingredient.
-
-        This uses a scan because the menu table is expected to be small.
-        For a larger menu table, create an inverted lookup table:
-        IngredientToMenuItems
-        - ingredient_name partition key
-        - menu_item sort key
-        """
-        response = self.menu_table.scan(
-            FilterExpression=Attr(f"ingredients.{ingredient}").exists(),
-            ProjectionExpression="menu_item",
-        )
-
-        matches = response.get("Items", [])
-
-        while "LastEvaluatedKey" in response:
-            response = self.menu_table.scan(
-                FilterExpression=Attr(f"ingredients.{ingredient}").exists(),
-                ProjectionExpression="menu_item",
-                ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
-            matches.extend(response.get("Items", []))
-
-        if not matches:
-            return None
-
-        return random.choice(matches)["menu_item"]
 
     def _send_sns_message(self, subject: str, message: dict[str, Any]) -> str:
         response = self.sns.publish(
@@ -188,8 +122,7 @@ class PricingAnalyzer:
 
         return response["MessageId"]
 
-    @staticmethod
-    def _money(value: Decimal) -> Decimal:
+    def _money(self, value: Decimal) -> Decimal:
         return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
