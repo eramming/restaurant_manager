@@ -7,10 +7,10 @@ app = FastAPI(title="InventoryManager Service")
 
 
 @app.post("/sale")
-def sale(request: Sale):
-    return handle_sale(request)
+def sale(sale: Sale):
+    return handle_sale(sale)
 
 
 @app.post("/ingredients/purchase")
-def new_purchase(request: PurchasedIngrs):
-    return handle_new_purchases(request)
+def new_purchase(ingr_purchase: PurchasedIngrs):
+    return handle_new_purchases(ingr_purchase)
