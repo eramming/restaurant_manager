@@ -66,7 +66,7 @@ Resources:
           echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
           echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
 
-  RecommendationEngineInstance:
+  SupplyGapAnalyzerInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-078f95be0757084a3
@@ -78,9 +78,9 @@ Resources:
         - !Ref AppSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub "${Environment}-RecommendationEngine"
+          Value: !Sub "${Environment}-SupplyGapAnalyzer"
         - Key: service
-          Value: RecommendationEngine
+          Value: SupplyGapAnalyzer
         - Key: environment
           Value: !Ref Environment
       UserData:
@@ -243,10 +243,10 @@ Resources:
         - Key: Service
           Value: InventoryManager
   
-  ForecastQueue:
+  SupplyGapQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub "${Environment}-forecast-queue"
+      QueueName: !Sub "${Environment}-supply-gap-queue"
 
       VisibilityTimeout: 30
 
@@ -305,7 +305,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - sqs:*
-                Resource: !GetAtt ForecastQueue.Arn
+                Resource: !GetAtt SupplyGapQueue.Arn
 
               - Sid: SnsAccess
                 Effect: Allow
@@ -345,11 +345,11 @@ Outputs:
     Description: Sales forecasting GSI
     Value: SalesByDayOfWeek
 
-  ForecastQueueUrl:
-    Value: !Ref ForecastQueue
+  SupplyGapQueueUrl:
+    Value: !Ref SupplyGapQueue
 
-  ForecastQueueArn:
-    Value: !GetAtt ForecastQueue.Arn
+  SupplyGapQueueArn:
+    Value: !GetAtt SupplyGapQueue.Arn
 
   PricingReportTopicArn:
     Description: SNS topic ARN for pricing report notifications
@@ -359,9 +359,9 @@ Outputs:
     Description: Public IP of InventoryManager instance
     Value: !GetAtt InventoryManagerInstance.PublicIp
 
-  RecommendationEnginePublicIP:
-    Description: Public IP of RecommendationEngine instance
-    Value: !GetAtt RecommendationEngineInstance.PublicIp
+  SupplyGapAnalyzerPublicIP:
+    Description: Public IP of SupplyGapAnalyzer instance
+    Value: !GetAtt SupplyGapAnalyzerInstance.PublicIp
 
   PricingAnalyzerPublicIP:
     Description: Public IP of PricingAnalyzer instance
@@ -371,9 +371,9 @@ Outputs:
     Description: Instance ID
     Value: !Ref InventoryManagerInstance
 
-  RecommendationEngineInstanceId:
+  SupplyGapAnalyzerInstanceId:
     Description: Instance ID
-    Value: !Ref RecommendationEngineInstance
+    Value: !Ref SupplyGapAnalyzerInstance
 
   PricingAnalyzerInstanceId:
     Description: Instance ID

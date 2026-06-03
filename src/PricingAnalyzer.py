@@ -24,7 +24,7 @@ class PricingAnalyzer:
         self.kroger_client: KrogerClient = KrogerClient()
         
     
-    def analyze(self, recommendations: dict[str, dict[str, float]]) -> dict[str, Any]:
+    def analyze_and_send(self, recommendations: dict[str, dict[str, float]]) -> dict[str, Any]:
         needed_report = self._analyze_needed_ingredients(recommendations.get("need", {}))
         expiring_report = self._analyze_expiring_ingredients(recommendations.get("expiring", {}))
 
@@ -139,5 +139,5 @@ if __name__ == "__main__":
         },
     }
 
-    result = analyzer.analyze(sample_recommendations)
+    result = analyzer.analyze_and_send(sample_recommendations)
     print(json.dumps(result, indent=2))

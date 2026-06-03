@@ -5,7 +5,7 @@ import boto3
 from PricingAnalyzer import PricingAnalyzer
 from mypy_boto3_sqs.client import SQSClient
 
-FORECAST_QUEUE: str = os.getenv("FORECAST_QUEUE_URL", None)
+SUPPLY_GAP_QUEUE: str = os.getenv("SUPPLY_GAP_QUEUE_URL", None)
 sqs: SQSClient = boto3.client("sqs")
 analyzer = PricingAnalyzer()
 
@@ -13,7 +13,7 @@ analyzer = PricingAnalyzer()
 def listen() -> None:
     while True:
         response = sqs.receive_message(
-            QueueUrl=FORECAST_QUEUE,
+            QueueUrl=SUPPLY_GAP_QUEUE,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=20,
             VisibilityTimeout=60,
@@ -24,9 +24,9 @@ def listen() -> None:
         for message in messages:
             try:
                 recommendations = json.loads(message["Body"])
-                analyzer.analyze(recommendations)
+                analyzer.analyze_and_send(recommendations)
                 sqs.delete_message(
-                    QueueUrl=FORECAST_QUEUE,
+                    QueueUrl=SUPPLY_GAP_QUEUE,
                     ReceiptHandle=message["ReceiptHandle"],
                 )
             except Exception as e:

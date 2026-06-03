@@ -14,7 +14,7 @@ MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 FORECAST_QUEUE = os.getenv("FORECAST_QUEUE_URL", None)
 
 
-class RecommendationEngine:
+class SupplyGapAnalyzer:
 
     def __init__(self):
         self.sqs: SQSClient = boto3.client("sqs")
@@ -22,9 +22,9 @@ class RecommendationEngine:
         self.inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
         self.menu_table: Table = dynamodb.Table(MENU_TABLE)
 
-    def recommend(self, predicted_sales: dict) -> dict:
+    def send_supply_gap(self, predicted_sales: dict) -> dict:
         predicted_sales: dict = DemandForecaster().predict_tmr_sales()
-        recommendations: dict = self.generate_recommendations(predicted_sales)
+        recommendations: dict = self.calculate_supply_gap(predicted_sales)
         self.notify(recommendations)
 
 
@@ -34,7 +34,7 @@ class RecommendationEngine:
             MessageBody=json.dumps(payload)
         )
 
-    def generate_recommendations(self, predicted_sales: dict[str, float]) -> dict:
+    def calculate_supply_gap(self, predicted_sales: dict[str, float]) -> dict:
         ingredient_demand: dict[str, Decimal] = self.calculate_ingredient_demand(predicted_sales)
         inventory: Dict[str, dict] = self.get_full_inventory(list(predicted_sales.keys()))
 
