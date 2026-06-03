@@ -6,6 +6,9 @@ from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 import random
 from decimal import Decimal
+from logging import Logger, getLogger
+
+LOG: Logger = getLogger(__name__)
 
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
@@ -120,6 +123,30 @@ menu = [
     }
 ]
 
+
+def clear_table(table: Table, key_names: List[str]):
+    scan_kwargs = {}
+
+    with table.batch_writer() as batch:
+        while True:
+            response = table.scan(**scan_kwargs)
+
+            for item in response.get("Items", []):
+                key = {
+                    key_name: item[key_name]
+                    for key_name in key_names
+                }
+
+                batch.delete_item(Key=key)
+
+            last_key = response.get("LastEvaluatedKey")
+            if not last_key:
+                break
+
+            scan_kwargs["ExclusiveStartKey"] = last_key
+
+    LOG.info(f"Cleared table {table.name}")
+
 def insert(items: List[dict], table: Table) -> None:
     for item in items:
         table.put_item(Item=item)
@@ -134,6 +161,10 @@ def seed_sales_db() -> None:
     insert(sale_history, sales_table)
 
 def main():
+    clear_table(inventory_table, ["ingredient"])
+    clear_table(menu_table, ["menu_item"])
+    clear_table(sales_table, ["sale_id"])
+    
     seed_inventory_db()
     seed_menu_db()
     seed_sales_db()

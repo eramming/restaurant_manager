@@ -7,7 +7,7 @@ from mypy_boto3_sqs.client import SQSClient
 
 SUPPLY_GAP_QUEUE: str = os.getenv("SUPPLY_GAP_QUEUE_URL", None)
 sqs: SQSClient = boto3.client("sqs")
-analyzer = PricingAnalyzer()
+pricing_analyzer = PricingAnalyzer()
 
 
 def listen() -> None:
@@ -23,8 +23,8 @@ def listen() -> None:
 
         for message in messages:
             try:
-                recommendations = json.loads(message["Body"])
-                analyzer.analyze_and_send(recommendations)
+                supply_gap_report = json.loads(message["Body"])
+                pricing_analyzer.analyze_and_send(supply_gap_report)
                 sqs.delete_message(
                     QueueUrl=SUPPLY_GAP_QUEUE,
                     ReceiptHandle=message["ReceiptHandle"],
