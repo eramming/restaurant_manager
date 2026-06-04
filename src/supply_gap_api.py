@@ -12,7 +12,7 @@ logging.basicConfig(
 LOG: Logger = getLogger(__name__)
 app = FastAPI(title="Forecasted Supply Gap Service")
 
-LOG.debug("Supply Gap API starting...")
+LOG.info("Supply Gap API starting...")
 
 
 @app.get("/supply_gap")

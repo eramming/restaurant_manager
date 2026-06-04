@@ -13,7 +13,7 @@ logging.basicConfig(
     force=True
 )
 LOG: Logger = getLogger(__name__)
-LOG.debug("Supply Gap Listener starting...")
+LOG.info("Supply Gap Listener starting...")
 
 SUPPLY_GAP_QUEUE: str = os.getenv("SUPPLY_GAP_QUEUE_URL", "dev-supply-gap-queue")
 sqs: SQSClient = boto3.client("sqs")

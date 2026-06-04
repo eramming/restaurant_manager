@@ -34,7 +34,7 @@ class PricingAnalyzer:
             "expiringLosses": expiring_report,
         }
 
-        LOG.debug(f"Pricing Report:\n{final_report}")
+        LOG.info(f"Pricing Report:\n{final_report}")
         self._send_sns_message(subject="Inventory Pricing Analysis", message=final_report)
         return final_report
 
