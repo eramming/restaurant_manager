@@ -50,7 +50,9 @@ class SupplyGapAnalyzer:
         tomorrow: datetime = datetime.now(timezone.utc).date() + timedelta(days=1)
 
         for ingredient, inventory_item in inventory.items():
-            required_amnt: Decimal = ingredient_demand.get(ingredient)
+            if not ingredient_demand.get(ingredient):
+                LOG.debug(f"Unknown demand for ingredient: {ingredient}")
+            required_amnt: Decimal = ingredient_demand.get(ingredient, Decimal("0"))
             available_amnt = Decimal(inventory_item.get("quantity", 0))
             expiration_date = inventory_item.get("expiration_date")
 
