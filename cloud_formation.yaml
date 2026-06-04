@@ -1,0 +1,456 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cloud Services for Restaurant Inventory Manager
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+Resources:
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and app traffic
+      VpcId: vpc-0957698fb6be82426
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0 # tighten this to your IP for real use
+
+  InventoryManagerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-InventoryManager"
+        - Key: service
+          Value: InventoryManager
+        - Key: environment
+          Value: !Ref Environment
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          cat > /root/.ssh/id_ed25519 <<'EOF'
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
+          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
+          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
+          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
+          -----END OPENSSH PRIVATE KEY-----
+          EOF
+          chmod 700 /root/.ssh
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+          chmod 644 /root/.ssh/known_hosts
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          export PATH="/root/.local/bin:$PATH"
+          uv python install 3.14
+          uv venv --python 3.14
+          uv sync
+
+          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
+          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
+          cd /home/ec2-user/restaurant_manager
+          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
+          sudo -u ec2-user bash -lc '
+            export PATH="$HOME/.local/bin:$PATH"
+            cd /home/ec2-user/restaurant_manager
+            uv python install 3.14
+            uv sync
+          '
+          
+
+  SupplyGapAnalyzerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-SupplyGapAnalyzer"
+        - Key: service
+          Value: SupplyGapAnalyzer
+        - Key: environment
+          Value: !Ref Environment
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          cat > /root/.ssh/id_ed25519 <<'EOF'
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
+          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
+          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
+          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
+          -----END OPENSSH PRIVATE KEY-----
+          EOF
+          chmod 700 /root/.ssh
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+          chmod 644 /root/.ssh/known_hosts
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          export PATH="/root/.local/bin:$PATH"
+          uv python install 3.14
+          uv venv --python 3.14
+          uv sync
+
+          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
+          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
+          cd /home/ec2-user/restaurant_manager
+          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
+          sudo -u ec2-user bash -lc '
+            export PATH="$HOME/.local/bin:$PATH"
+            cd /home/ec2-user/restaurant_manager
+            uv python install 3.14
+            uv sync
+          '
+
+  PricingAnalyzerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-078f95be0757084a3
+      InstanceType: t3.micro
+      KeyName: EC2_SSH_Key
+      IamInstanceProfile: !Ref AppEc2InstanceProfile
+      SubnetId: subnet-0389b963c229d8bab
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-PricingAnalyzer"
+        - Key: service
+          Value: PricingAnalyzer
+        - Key: environment
+          Value: !Ref Environment
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
+          dnf update -y
+          dnf install -y git awscli
+
+          mkdir -p /root/.ssh
+          cat > /root/.ssh/id_ed25519 <<'EOF'
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
+          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
+          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
+          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
+          -----END OPENSSH PRIVATE KEY-----
+          EOF
+          chmod 700 /root/.ssh
+          chmod 600 /root/.ssh/id_ed25519
+          ssh-keyscan github.com >> /root/.ssh/known_hosts
+          chmod 644 /root/.ssh/known_hosts
+          cat > /root/.ssh/config <<EOF
+          Host github.com
+            IdentityFile /root/.ssh/id_ed25519
+            IdentitiesOnly yes
+          EOF
+          chmod 600 /root/.ssh/config
+
+          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
+          cd /opt/restaurant_manager
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          export PATH="/root/.local/bin:$PATH"
+          uv python install 3.14
+          uv venv --python 3.14
+          uv sync
+
+          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
+          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
+          cd /home/ec2-user/restaurant_manager
+          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
+          sudo -u ec2-user bash -lc '
+            export PATH="$HOME/.local/bin:$PATH"
+            cd /home/ec2-user/restaurant_manager
+            uv python install 3.14
+            uv sync
+          '
+
+  InventoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Inventory"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: ingredient
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: ingredient
+          KeyType: HASH
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  MenuTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Menu"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: menu_item
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: menu_item
+          KeyType: HASH
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  SalesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-Sales"
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: sale_id
+          AttributeType: S
+
+        - AttributeName: dayOfWeek
+          AttributeType: S
+
+        - AttributeName: date
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: sale_id
+          KeyType: HASH
+
+      GlobalSecondaryIndexes:
+        - IndexName: SalesByDayOfWeek
+          KeySchema:
+            - AttributeName: dayOfWeek
+              KeyType: HASH
+            - AttributeName: date
+              KeyType: RANGE
+
+          Projection:
+            ProjectionType: ALL
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+  
+  SupplyGapQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${Environment}-supply-gap-queue"
+
+      VisibilityTimeout: 30
+
+      MessageRetentionPeriod: 345600 # 4 days
+
+      ReceiveMessageWaitTimeSeconds: 20 # long polling
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+  
+  PriceReportTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Environment}-price-report-topic"
+      DisplayName: Price Report Alerts
+      Tags:
+        - Key: Service
+          Value: InventoryManager
+
+  PriceReportEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref PriceReportTopic
+      Protocol: email
+      Endpoint: eramming14@gmail.com
+
+
+  AppEc2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Environment}-restaurant-app-ec2-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RestaurantAppAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: DynamoDbAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:*
+                Resource:
+                  - !GetAtt InventoryTable.Arn
+                  - !GetAtt MenuTable.Arn
+                  - !GetAtt SalesTable.Arn
+                  - !Sub "${SalesTable.Arn}/index/*"
+
+              - Sid: SqsAccess
+                Effect: Allow
+                Action:
+                  - sqs:*
+                Resource: !GetAtt SupplyGapQueue.Arn
+
+              - Sid: SnsAccess
+                Effect: Allow
+                Action:
+                  - sns:*
+                Resource: !Ref PriceReportTopic
+
+              - Sid: GithubSshSecretsAccess
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:github-ssh-key*"
+
+  AppEc2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${Environment}-restaurant-app-instance-profile"
+      Roles:
+        - !Ref AppEc2Role
+
+
+Outputs:
+
+  InventoryTableName:
+    Description: Inventory table name
+    Value: !Ref InventoryTable
+
+  MenuTableName:
+    Description: Menu table name
+    Value: !Ref MenuTable
+
+  SalesTableName:
+    Description: Sales table name
+    Value: !Ref SalesTable
+
+  SalesByDayOfWeekIndex:
+    Description: Sales forecasting GSI
+    Value: SalesByDayOfWeek
+
+  SupplyGapQueueUrl:
+    Value: !Ref SupplyGapQueue
+
+  SupplyGapQueueArn:
+    Value: !GetAtt SupplyGapQueue.Arn
+
+  PriceReportTopicArn:
+    Description: SNS topic ARN for price report notifications
+    Value: !Ref PriceReportTopic
+
+  InventoryManagerPublicIP:
+    Description: Public IP of InventoryManager instance
+    Value: !GetAtt InventoryManagerInstance.PublicIp
+
+  SupplyGapAnalyzerPublicIP:
+    Description: Public IP of SupplyGapAnalyzer instance
+    Value: !GetAtt SupplyGapAnalyzerInstance.PublicIp
+
+  PricingAnalyzerPublicIP:
+    Description: Public IP of PricingAnalyzer instance
+    Value: !GetAtt PricingAnalyzerInstance.PublicIp
+
+  InventoryManagerInstanceId:
+    Description: Instance ID
+    Value: !Ref InventoryManagerInstance
+
+  SupplyGapAnalyzerInstanceId:
+    Description: Instance ID
+    Value: !Ref SupplyGapAnalyzerInstance
+
+  PricingAnalyzerInstanceId:
+    Description: Instance ID
+    Value: !Ref PricingAnalyzerInstance
