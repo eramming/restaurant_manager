@@ -8,6 +8,9 @@ from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from DemandForecaster import DemandForecaster
 import boto3
 from typing import Dict, List
+from logging import Logger, getLogger
+
+LOG: Logger = getLogger(__name__)
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
@@ -24,8 +27,9 @@ class SupplyGapAnalyzer:
 
     def send_supply_gap(self) -> dict:
         predicted_sales: dict = DemandForecaster().predict_tmr_sales()
-        recommendations: dict = self.calculate_supply_gap(predicted_sales)
-        self.notify(recommendations)
+        supply_gap_report: dict = self.calculate_supply_gap(predicted_sales)
+        LOG.debug(f"Supply Gap Report:\n{supply_gap_report}")
+        self.notify(supply_gap_report)
 
 
     def notify(self, payload: dict) -> None:

@@ -7,10 +7,11 @@ from collections import defaultdict
 from datetime import timedelta
 from boto3.dynamodb.conditions import Key
 from typing import List
+from logging import getLogger, Logger
 
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 SALES_TABLE = os.getenv("SALES_TABLE", "dev-Sales")
-
+LOG: Logger = getLogger(__name__)
 
 class DemandForecaster:
 
@@ -88,4 +89,5 @@ class DemandForecaster:
         for menu_item in menu_items:
             averages[menu_item] = round(totals_by_dish[menu_item] / num_samples)
 
+        LOG.debug(f"Tomorrow's predicted demand:\n{averages}")
         return averages

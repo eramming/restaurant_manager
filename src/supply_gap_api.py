@@ -1,7 +1,18 @@
 from fastapi import FastAPI
 from SupplyGapAnalyzer import SupplyGapAnalyzer
+from logging import getLogger, Logger
+import logging
+import os
 
+log_level: str = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=log_level,
+    force=True
+)
+LOG: Logger = getLogger(__name__)
 app = FastAPI(title="Forecasted Supply Gap Service")
+
+LOG.debug("Supply Gap API starting...")
 
 
 @app.get("/supply_gap")

@@ -7,8 +7,9 @@ import boto3
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_sns.client import SNSClient
 from KrogerClient import KrogerClient, PriceResult
+from logging import Logger, getLogger
 
-
+LOG: Logger = getLogger(__name__)
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 SNS_ARN = os.getenv("PRICE_REPORT_SNS_ARN", None)
@@ -33,6 +34,7 @@ class PricingAnalyzer:
             "expiringLosses": expiring_report,
         }
 
+        LOG.debug(f"Pricing Report:\n{final_report}")
         self._send_sns_message(subject="Inventory Pricing Analysis", message=final_report)
         return final_report
 

@@ -4,6 +4,16 @@ import time
 import boto3
 from PricingAnalyzer import PricingAnalyzer
 from mypy_boto3_sqs.client import SQSClient
+import logging
+from logging import Logger, getLogger
+
+log_level: str = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=log_level,
+    force=True
+)
+LOG: Logger = getLogger(__name__)
+LOG.debug("Supply Gap Listener starting...")
 
 SUPPLY_GAP_QUEUE: str = os.getenv("SUPPLY_GAP_QUEUE_URL", None)
 sqs: SQSClient = boto3.client("sqs")
