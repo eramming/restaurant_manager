@@ -96,7 +96,7 @@ class SupplyGapAnalyzer:
         if not item:
             return {}
 
-        return item.get("ingredients", {})
+        return item.get("recipe", {})
 
 
     def get_full_inventory(self, ingredients: List[str]) -> Dict[str, dict]:
