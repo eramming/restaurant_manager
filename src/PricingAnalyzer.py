@@ -10,9 +10,9 @@ from KrogerClient import KrogerClient, PriceResult
 from logging import Logger, getLogger
 
 LOG: Logger = getLogger(__name__)
-INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
-MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
-SNS_ARN = os.getenv("PRICE_REPORT_SNS_ARN", None)
+INVENTORY_TABLE: str = os.getenv("INVENTORY_TABLE", "dev-Inventory")
+MENU_TABLE: str = os.getenv("MENU_TABLE", "dev-Menu")
+SNS_ARN: str = os.getenv("PRICE_REPORT_SNS_ARN", "dev-price-report-topic")
 
 class PricingAnalyzer:
 

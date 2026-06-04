@@ -14,7 +14,7 @@ LOG: Logger = getLogger(__name__)
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
-FORECAST_QUEUE = os.getenv("FORECAST_QUEUE_URL", None)
+SUPPLY_GAP_QUEUE = os.getenv("SUPPLY_GAP_QUEUE_URL", "dev-supply-gap-queue")
 
 
 class SupplyGapAnalyzer:
@@ -34,7 +34,7 @@ class SupplyGapAnalyzer:
 
     def notify(self, payload: dict) -> None:
         self.sqs.send_message(
-            QueueUrl=FORECAST_QUEUE,
+            QueueUrl=SUPPLY_GAP_QUEUE,
             MessageBody=json.dumps(payload)
         )
 

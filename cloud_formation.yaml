@@ -262,19 +262,19 @@ Resources:
         - Key: Service
           Value: InventoryManager
   
-  PricingReportTopic:
+  PriceReportTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub "${Environment}-pricing-report-topic"
-      DisplayName: Pricing Report Alerts
+      TopicName: !Sub "${Environment}-price-report-topic"
+      DisplayName: Price Report Alerts
       Tags:
         - Key: Service
           Value: InventoryManager
 
-  PricingReportEmailSubscription:
+  PriceReportEmailSubscription:
     Type: AWS::SNS::Subscription
     Properties:
-      TopicArn: !Ref PricingReportTopic
+      TopicArn: !Ref PriceReportTopic
       Protocol: email
       Endpoint: eramming14@gmail.com
 
@@ -315,7 +315,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - sns:*
-                Resource: !Ref PricingReportTopic
+                Resource: !Ref PriceReportTopic
 
               - Sid: GithubSshSecretsAccess
                 Effect: Allow
@@ -355,9 +355,9 @@ Outputs:
   SupplyGapQueueArn:
     Value: !GetAtt SupplyGapQueue.Arn
 
-  PricingReportTopicArn:
-    Description: SNS topic ARN for pricing report notifications
-    Value: !Ref PricingReportTopic
+  PriceReportTopicArn:
+    Description: SNS topic ARN for price report notifications
+    Value: !Ref PriceReportTopic
 
   InventoryManagerPublicIP:
     Description: Public IP of InventoryManager instance
