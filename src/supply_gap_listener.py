@@ -7,7 +7,7 @@ from mypy_boto3_sqs.client import SQSClient
 import logging
 from logging import Logger, getLogger
 
-log_level: str = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level: str = os.getenv("LOG_LEVEL", "WARN").upper()
 logging.basicConfig(
     level=log_level,
     force=True

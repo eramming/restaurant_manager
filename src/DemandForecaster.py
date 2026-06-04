@@ -89,5 +89,5 @@ class DemandForecaster:
         for menu_item in menu_items:
             averages[menu_item] = round(totals_by_dish[menu_item] / num_samples)
 
-        LOG.debug(f"Tomorrow's predicted demand:\n{averages}")
+        LOG.info(f"Tomorrow's predicted demand:\n{averages}")
         return averages

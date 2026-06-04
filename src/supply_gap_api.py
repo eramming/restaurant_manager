@@ -4,7 +4,7 @@ from logging import getLogger, Logger
 import logging
 import os
 
-log_level: str = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level: str = os.getenv("LOG_LEVEL", "WARN").upper()
 logging.basicConfig(
     level=log_level,
     force=True

@@ -7,13 +7,13 @@ import logging
 from logging import getLogger, Logger
 
 
-log_level: str = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level: str = os.getenv("LOG_LEVEL", "WARN").upper()
 logging.basicConfig(
     level=log_level,
     force=True
 )
 LOG: Logger = getLogger(__name__)
-LOG.debug("Inventory Manager api starting...")
+LOG.info("Inventory Manager api starting...")
 app = FastAPI(title="InventoryManager Service")
 
 
