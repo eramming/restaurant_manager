@@ -81,15 +81,6 @@ Resources:
 
           git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
           chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
-          cd /home/ec2-user/restaurant_manager
-          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
-          sudo -u ec2-user bash -lc '
-            export PATH="$HOME/.local/bin:$PATH"
-            cd /home/ec2-user/restaurant_manager
-            uv python install 3.14
-            uv sync
-          '
           
 
   SupplyGapAnalyzerInstance:
@@ -151,15 +142,6 @@ Resources:
 
           git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
           chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
-          cd /home/ec2-user/restaurant_manager
-          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
-          sudo -u ec2-user bash -lc '
-            export PATH="$HOME/.local/bin:$PATH"
-            cd /home/ec2-user/restaurant_manager
-            uv python install 3.14
-            uv sync
-          '
 
   PricingAnalyzerInstance:
     Type: AWS::EC2::Instance
@@ -220,15 +202,6 @@ Resources:
 
           git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
           chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
-          cd /home/ec2-user/restaurant_manager
-          sudo -u ec2-user bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-          sudo -u ec2-user bash -lc 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.bashrc'
-          sudo -u ec2-user bash -lc '
-            export PATH="$HOME/.local/bin:$PATH"
-            cd /home/ec2-user/restaurant_manager
-            uv python install 3.14
-            uv sync
-          '
 
   InventoryTable:
     Type: AWS::DynamoDB::Table
