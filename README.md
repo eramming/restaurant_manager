@@ -33,11 +33,40 @@ The pricing analyzer receives the supply gap report. It hits the Kroger api to g
 6) end-user buys needed ingredients and uses inventory_manager_api to reflect these purchases.
 
 ## AWS Components
-. 3 EC2 instances for: inventory_manager_api.py, SupplyGapAnalyzer.py, and PricingAnalyzer.py
-. 1 SQS queue to connect SupplyGapAnalyzer and PricingAnalyzer
-. 1 SNS notification from PricingAnalyzer to my personal email
-. Tables
-.. Inventory
-.. Sales
-.. Menu
-.. 
+- 3 EC2 instances for: inventory_manager_api.py, SupplyGapAnalyzer.py, and PricingAnalyzer.py
+- 1 SQS queue to connect SupplyGapAnalyzer and PricingAnalyzer
+- 1 SNS notification from PricingAnalyzer to my personal email
+- Tables
+    - Inventory
+    - Sales
+    - Menu 
+
+
+
+## EC2 Instance Manual Config
+1) Github private ssh key.
+
+    For some reason we can pull this ssh key from AWS secrets manager, but when attempting to use it it fails. It's the correct looking key, so idk. Instead, I've been manually copying a local version of it to the ec2 instance. Now you can clone the restuarant_manager repo from within the instance. You may need to switch to the appropriate branch.
+
+    - `scp -i ../.ssh/jhu_aws_ssh_key.pem id_ed25519 ec2-user@<instance-public-ip-addy>:/home/ec2-user/.ssh`
+    - `git clone git@github.com:eramming/restaurant_manager.git`
+    - `git switch pre-cloud-dev`
+
+2) Install `uv` and install packages.
+    1) `curl -LsSf https://astral.sh/uv/install.sh | sh`
+    2) `uv python install 3.14`
+    3) `uv venv --python 3.14`
+    4) `uv sync`
+
+
+3) Launch whatever service is appropriate.
+    - _Inventory Management Service_: 
+        1) `uv run python scripts/seed_dynamo.py`
+        2) `cd src`
+        3) `uv run uvicorn inventory_manager_api:app --host 0.0.0.0 --port 8000`
+    - _Supply Gap Service_:
+        1) `cd src`
+        2) `uv run uvicorn supply_gap_api:app --host 0.0.0.0 --port 8000`
+    - _Pricing Service_:
+        1) `cd src`
+        2) `uv run python supply_gap_listener.py`

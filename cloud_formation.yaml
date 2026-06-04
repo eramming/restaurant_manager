@@ -44,6 +44,9 @@ Resources:
           #!/bin/bash
           set -euxo pipefail
 
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
           dnf update -y
           dnf install -y git awscli
 
@@ -63,8 +66,7 @@ Resources:
           chmod 600 /root/.ssh/config
           git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
           cd /opt/restaurant_manager
-          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
-          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          
 
   SupplyGapAnalyzerInstance:
     Type: AWS::EC2::Instance
@@ -88,6 +90,9 @@ Resources:
           #!/bin/bash
           set -euxo pipefail
 
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
           dnf update -y
           dnf install -y git awscli
 
@@ -107,8 +112,6 @@ Resources:
           chmod 600 /root/.ssh/config
           git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
           cd /opt/restaurant_manager
-          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
-          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
 
   PricingAnalyzerInstance:
     Type: AWS::EC2::Instance
@@ -132,6 +135,9 @@ Resources:
           #!/bin/bash
           set -euxo pipefail
 
+          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
+          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
+
           dnf update -y
           dnf install -y git awscli
 
@@ -151,8 +157,6 @@ Resources:
           chmod 600 /root/.ssh/config
           git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
           cd /opt/restaurant_manager
-          echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
-          echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
 
   InventoryTable:
     Type: AWS::DynamoDB::Table
