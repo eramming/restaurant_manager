@@ -48,7 +48,7 @@ class DemandForecaster:
         response = self.sales_table.query(
             IndexName="SalesByDayOfWeek",
             KeyConditionExpression=(
-                Key("day_of_week").eq(day_of_week) &
+                Key("dayOfWeek").eq(day_of_week) &
                 Key("date").gte(cutoff_day.isoformat())
             )
         )
