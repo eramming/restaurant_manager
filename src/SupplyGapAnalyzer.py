@@ -69,7 +69,7 @@ class SupplyGapAnalyzer:
             if predicted_quantity <= 0:
                 continue
 
-            recipe = self.get_recipe(self, menu_item)
+            recipe = self.get_recipe(menu_item)
 
             for ingredient_name, amount_per_menu_item in recipe.items():
                 ingredient_demand[ingredient_name] += (
