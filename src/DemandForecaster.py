@@ -59,7 +59,7 @@ class DemandForecaster:
             response = self.sales_table.query(
                 IndexName="SalesByDayOfWeek",
                 KeyConditionExpression=(
-                    Key("day_of_week").eq(day_of_week) &
+                    Key("dayOfWeek").eq(day_of_week) &
                     Key("date").gte(cutoff_day.isoformat())
                 ),
                 ExclusiveStartKey=response["LastEvaluatedKey"]
@@ -78,8 +78,8 @@ class DemandForecaster:
         totals_by_dish = defaultdict(float)
 
         for sale in sales_items:
-            menu_item = sale["menu_item"]
-            quantity = float(sale["quantity"])
+            menu_item = sale["dish"]
+            quantity = float(sale["amount"])
 
             totals_by_dish[menu_item] += quantity
 
