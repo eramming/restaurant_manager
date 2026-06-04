@@ -19,12 +19,12 @@ class DemandForecaster:
         self.menu_table: Table = dynamodb.Table(MENU_TABLE)
         self.sales_table: Table = dynamodb.Table(SALES_TABLE)
 
-    def get_tomorrows_day_of_week() -> str:
+    def get_tomorrows_day_of_week(self) -> str:
         tomorrow_utc = datetime.now(timezone.utc) + timedelta(days=1)
         return tomorrow_utc.strftime("%A").lower()
 
 
-    def generate_cutoff_day(n: int = 4) -> datetime:
+    def generate_cutoff_day(self, n: int = 4) -> datetime:
         return datetime.now(timezone.utc) - timedelta(days=7 * n)
 
 
