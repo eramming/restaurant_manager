@@ -22,7 +22,7 @@ class SupplyGapAnalyzer:
         self.inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
         self.menu_table: Table = dynamodb.Table(MENU_TABLE)
 
-    def send_supply_gap(self, predicted_sales: dict) -> dict:
+    def send_supply_gap(self) -> dict:
         predicted_sales: dict = DemandForecaster().predict_tmr_sales()
         recommendations: dict = self.calculate_supply_gap(predicted_sales)
         self.notify(recommendations)
