@@ -8,7 +8,8 @@ from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from DemandForecaster import DemandForecaster
 import boto3
 from inventory_classes import PurchasedIngredient
-from typing import Dict, List
+from typing import List
+from datetime import date
 from logging import Logger, getLogger
 
 LOG: Logger = getLogger(__name__)
@@ -50,8 +51,6 @@ class SupplyGapAnalyzer:
             "expiring": {}
         }
 
-        tomorrow: datetime = datetime.now(timezone.utc).date() + timedelta(days=1)
-
         for ingr_obj in inventory:
             required_amnt: Decimal = ingredient_demand.get(ingr_obj.ingredient, Decimal("0"))
             available_amnt = Decimal(ingr_obj.quantity)
@@ -61,7 +60,7 @@ class SupplyGapAnalyzer:
                 message["need"][ingr_obj.ingredient] = float(shortage)
             elif available_amnt == required_amnt:
                 continue
-            elif self.expires_within_one_day(ingr_obj.expiration_date, tomorrow):
+            elif self.expires_within_one_day(ingr_obj.expiration_date):
                 delta = available_amnt - required_amnt
                 message["expiring"][ingr_obj.ingredient] = float(delta)
 
@@ -114,9 +113,7 @@ class SupplyGapAnalyzer:
         return [PurchasedIngredient(**item) for item in items]
 
 
-    def expires_within_one_day(expiration_date: str | None, ref_date: datetime) -> bool:
+    def expires_within_one_day(self, expiration_date: date | None) -> bool:
         if not expiration_date:
             return False
-
-        expiration = datetime.fromisoformat(expiration_date).date()
-        return expiration <= ref_date + timedelta(days=1)
+        return expiration_date <= (datetime.now(timezone.utc).date() + timedelta(days=1))
