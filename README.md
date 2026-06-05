@@ -44,13 +44,27 @@ The pricing analyzer receives the supply gap report. It hits the Kroger api to g
 
 
 ## EC2 Instance Manual Config
+As of now, you will have to:
+- `chown -R ec2-user:ec2-user restaurant_manager` from /home/ec2-user
+- `cd restaurant_manager`
+- `chmod +x scripts/ec2_setup.sh`
+- `scripts/ec2_setup.sh`
+- `git pull`
+- whatever command lauches that particular service
+
+Also, I deleted the Github ssh key that JHU AWS stuff was using, so will need to recreate one:
+- add to github account
+- copy into cloudformation.yaml
+- copy into scripts/ec2_setup.sh
+
+
+
 1) Github private ssh key.
 
     For some reason we can pull this ssh key from AWS secrets manager, but when attempting to use it it fails. It's the correct looking key, so idk. Instead, I've been manually copying a local version of it to the ec2 instance. Now you can clone the restuarant_manager repo from within the instance. You may need to switch to the appropriate branch.
 
     - `scp -i ../.ssh/jhu_aws_ssh_key.pem id_ed25519 ec2-user@<instance-public-ip-addy>:/home/ec2-user/.ssh`
     - `git clone git@github.com:eramming/restaurant_manager.git`
-    - `git switch pre-cloud-dev`
 
 2) Install `uv` and install packages.
     1) `curl -LsSf https://astral.sh/uv/install.sh | sh`
