@@ -168,6 +168,7 @@ Resources:
           echo "export AWS_REGION=us-east-2" >> /home/ec2-user/.bashrc
           echo "export AWS_DEFAULT_REGION=us-east-2" >> /home/ec2-user/.bashrc
           echo "export KROGER_LOCATION_ID=09700021" >> /home/ec2-user/.bashrc
+          echo 'export PRICE_REPORT_TOPIC_ARN=${PriceReportTopic}' >> /home/ec2-user/.bashrc
           
 
           dnf update -y

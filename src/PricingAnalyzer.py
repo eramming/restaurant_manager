@@ -12,13 +12,13 @@ from logging import Logger, getLogger
 LOG: Logger = getLogger(__name__)
 INVENTORY_TABLE: str = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE: str = os.getenv("MENU_TABLE", "dev-Menu")
-SNS_ARN: str = os.getenv("PRICE_REPORT_SNS_ARN", "dev-price-report-topic")
+PRICE_REPORT_TOPIC_ARN: str = os.getenv("PRICE_REPORT_TOPIC_ARN", None)
 
 class PricingAnalyzer:
 
     def __init__(self):
         self.sns: SNSClient = boto3.client("sns")
-        self.sns_topic_arn: str = SNS_ARN
+        self.sns_topic_arn: str = PRICE_REPORT_TOPIC_ARN
         dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
         self.inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
         self.menu_table: Table = dynamodb.Table(MENU_TABLE)

@@ -37,7 +37,7 @@ class KrogerClient:
         params = {
             "filter.term": ingredient,
             "filter.limit": 10,
-            # "filter.locationId": self.location_id
+            "filter.locationId": self.location_id
         }
 
         LOG.info(f"Making Kroger api call: {self.host_url}/products with params={params}")
