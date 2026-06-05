@@ -42,7 +42,7 @@ class SupplyGapAnalyzer:
     def calculate_supply_gap(self, predicted_sales: dict[str, float]) -> dict:
         ingredient_demand: dict[str, Decimal] = self.calculate_ingredient_demand(predicted_sales)
         LOG.info(f"Ingr Demand: {ingredient_demand}")
-        inventory: Dict[str, dict] = self.get_full_inventory(list(predicted_sales.keys()))
+        inventory: List[PurchasedIngredient] = self.get_full_inventory()
         LOG.info(f"Current Ingr Inventory: {inventory}")
 
         message = {
@@ -52,21 +52,18 @@ class SupplyGapAnalyzer:
 
         tomorrow: datetime = datetime.now(timezone.utc).date() + timedelta(days=1)
 
-        for ingredient, inventory_item in inventory.items():
-            if not ingredient_demand.get(ingredient):
-                LOG.info(f"Unknown demand for ingredient: {ingredient}")
-            required_amnt: Decimal = ingredient_demand.get(ingredient, Decimal("0"))
-            available_amnt = Decimal(inventory_item.get("quantity", 0))
-            expiration_date = inventory_item.get("expiration_date")
+        for ingr_obj in inventory:
+            required_amnt: Decimal = ingredient_demand.get(ingr_obj.ingredient, Decimal("0"))
+            available_amnt = Decimal(ingr_obj.quantity)
 
             if available_amnt < required_amnt:
                 shortage = required_amnt - available_amnt
-                message["need"][ingredient] = float(shortage)
+                message["need"][ingr_obj.ingredient] = float(shortage)
             elif available_amnt == required_amnt:
                 continue
-            elif self.expires_within_one_day(expiration_date, tomorrow):
+            elif self.expires_within_one_day(ingr_obj.expiration_date, tomorrow):
                 delta = available_amnt - required_amnt
-                message["expiring"][ingredient] = float(delta)
+                message["expiring"][ingr_obj.ingredient] = float(delta)
 
         return message
 
