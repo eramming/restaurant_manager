@@ -14,7 +14,7 @@ inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
 
 def handle_new_purchases(purchase: PurchasedIngrs):
     for ingredient in purchase.ingredients:
-        ingr_key = ingredient.name.lower()
+        ingr_key = ingredient.ingredient.lower()
 
         try:
             inventory_table.update_item(

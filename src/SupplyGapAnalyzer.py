@@ -7,6 +7,7 @@ from mypy_boto3_sqs.client import SQSClient
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from DemandForecaster import DemandForecaster
 import boto3
+from inventory_classes import PurchasedIngredient
 from typing import Dict, List
 from logging import Logger, getLogger
 
@@ -43,7 +44,7 @@ class SupplyGapAnalyzer:
         LOG.info(f"Ingr Demand: {ingredient_demand}")
         inventory: Dict[str, dict] = self.get_full_inventory(list(predicted_sales.keys()))
         LOG.info(f"Current Ingr Inventory: {inventory}")
-        
+
         message = {
             "need": {},
             "expiring": {}
@@ -102,26 +103,18 @@ class SupplyGapAnalyzer:
         return item.get("recipe", {})
 
 
-    def get_full_inventory(self, ingredients: List[str]) -> Dict[str, dict]:
-        inventory = {}
+    def get_full_inventory(self) -> List[PurchasedIngredient]:
+        items: List[PurchasedIngredient] = []
 
-        for ingredient in ingredients:
-            response = self.inventory_table.get_item(
-                Key={"ingredient": ingredient}
+        response = self.inventory_table.scan()
+        items.extend(response.get("Items", []))
+
+        while "LastEvaluatedKey" in response:
+            response = self.inventory_table.scan(
+                ExclusiveStartKey=response["LastEvaluatedKey"]
             )
-
-            item = response.get("Item")
-
-            if item:
-                inventory[ingredient] = item
-            else:
-                inventory[ingredient] = {
-                    "ingredient": ingredient,
-                    "quantity": 0,
-                    "unit": None,
-                    "expiration_date": None
-                }
-        return inventory
+            items.extend(response.get("Items", []))
+        return [PurchasedIngredient(**item) for item in items]
 
 
     def expires_within_one_day(expiration_date: str | None, ref_date: datetime) -> bool:

@@ -12,7 +12,7 @@ class MenuItem(BaseModel):
     quantity_sold: int = Field(gt=0)
 
 class PurchasedIngredient(BaseModel):
-    name: str
+    ingredient: str
     quantity: float = Field(gt=0)
     unit: str
     expiration_date: date | None = None
