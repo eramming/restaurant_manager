@@ -75,10 +75,13 @@ class SupplyGapAnalyzer:
             if predicted_quantity <= 0:
                 continue
 
-            recipe = self.get_recipe(menu_item)
+            recipe: List[dict] = self.get_recipe(menu_item)
 
-            for ingredient_name, amount_per_menu_item in recipe.items():
-                ingredient_demand[ingredient_name] += (
+            for ingr_details in recipe:
+                ingredient = ingr_details["ingredient"]
+                amount_per_menu_item = ingr_details["quantity"]
+
+                ingredient_demand[ingredient] += (
                     Decimal(str(amount_per_menu_item)) *
                     Decimal(str(predicted_quantity))
                 )
@@ -86,7 +89,7 @@ class SupplyGapAnalyzer:
         return dict(ingredient_demand)
 
 
-    def get_recipe(self, menu_item: str) -> dict:
+    def get_recipe(self, menu_item: str) -> List[dict]:
         response = self.menu_table.get_item(
             Key={"menu_item": menu_item}
         )
