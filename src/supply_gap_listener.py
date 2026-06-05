@@ -30,7 +30,8 @@ def listen() -> None:
         )
 
         messages = response.get("Messages", [])
-        LOG.info(f"Received {len(messages)} messages from queue. Beginning processing...")
+        if len(messages) > 0:
+            LOG.info(f"Received {len(messages)} messages from queue. Beginning processing...")
 
         for message in messages:
             try:

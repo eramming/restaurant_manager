@@ -37,7 +37,7 @@ class KrogerClient:
         params = {
             "filter.term": ingredient,
             "filter.limit": 10,
-            "filter.locationId": self.location_id
+            # "filter.locationId": self.location_id
         }
 
         LOG.info(f"Making Kroger api call: {self.host_url}/products with params={params}")
@@ -55,7 +55,7 @@ class KrogerClient:
             LOG.error(response.status_code)
         response.raise_for_status()
         
-        return self.parse_results(response.json())
+        return self.parse_results(response.json(), ingredient)
 
         
     def parse_results(self, json: dict, ingr: str) -> PriceResult:
