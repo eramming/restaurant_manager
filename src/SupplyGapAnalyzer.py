@@ -42,7 +42,8 @@ class SupplyGapAnalyzer:
         ingredient_demand: dict[str, Decimal] = self.calculate_ingredient_demand(predicted_sales)
         LOG.info(f"Ingr Demand: {ingredient_demand}")
         inventory: Dict[str, dict] = self.get_full_inventory(list(predicted_sales.keys()))
-
+        LOG.info(f"Current Ingr Inventory: {inventory}")
+        
         message = {
             "need": {},
             "expiring": {}
