@@ -42,4 +42,7 @@ uv venv --python 3.14
 echo "Installing project dependencies..."
 uv sync
 
+echo "Setting LOG_LEVEL to INFO"
+export LOG_LEVEL=info
+
 echo "Bootstrap complete"

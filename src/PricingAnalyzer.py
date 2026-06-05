@@ -25,9 +25,11 @@ class PricingAnalyzer:
         self.kroger_client: KrogerClient = KrogerClient()
         
     
-    def analyze_and_send(self, recommendations: dict[str, dict[str, float]]) -> dict[str, Any]:
-        needed_report = self._analyze_needed_ingredients(recommendations.get("need", {}))
-        expiring_report = self._analyze_expiring_ingredients(recommendations.get("expiring", {}))
+    def analyze_and_send(self, supply_gap_report: dict[str, dict[str, float]]) -> dict[str, Any]:
+        needed_report = self._analyze_needed_ingredients(supply_gap_report["need"])
+        LOG.info(f"Needed Prices: {needed_report}")
+        expiring_report = self._analyze_expiring_ingredients(supply_gap_report["expiring"])
+        LOG.info(f"Expiring Prices: {expiring_report}")
 
         final_report = {
             "neededPriceChanges": needed_report,

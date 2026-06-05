@@ -30,6 +30,7 @@ def listen() -> None:
         )
 
         messages = response.get("Messages", [])
+        LOG.info(f"Received {len(messages)} messages from queue. Beginning processing...")
 
         for message in messages:
             try:
@@ -40,15 +41,21 @@ def listen() -> None:
                     ReceiptHandle=message["ReceiptHandle"],
                 )
             except Exception as e:
-                print(f"Failed to process message: {e}")
+                LOG.info(f"Failed to process message: {e}")
 
         if not messages:
             time.sleep(10)
 
 
 def main() -> None:
-    listen()
-    
+    try:
+        listen()
+    except KeyboardInterrupt:
+        LOG.info("Interrupt received. Shutting down listener.")
+    except Exception:
+        LOG.exception("Fatal error in listener")
+        raise
+
 
 if __name__ == "__main__":
     main()

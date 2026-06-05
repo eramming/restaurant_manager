@@ -4,7 +4,9 @@ import base64
 from decimal import Decimal
 from typing import Any
 from dataclasses import dataclass
+from logging import Logger, getLogger
 
+LOG: Logger = getLogger(__name__)
 
 @dataclass
 class PriceResult:
@@ -38,6 +40,7 @@ class KrogerClient:
             "filter.locationId": self.location_id
         }
 
+        LOG.info(f"Making Kroger api call: {self.host_url}/products with params={params}")
         response = requests.get(
             f"{self.host_url}/products",
             headers={
@@ -47,7 +50,11 @@ class KrogerClient:
             params=params,
             timeout=10
         )
+        if not response.ok:
+            LOG.error(response.text)
+            LOG.error(response.status_code)
         response.raise_for_status()
+        
         return self.parse_results(response.json())
 
         
@@ -69,6 +76,7 @@ class KrogerClient:
         credentials = f"{self.client_id}:{self.client_secret}"
         encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
 
+        LOG.info(f"Making Kroger api call: {self.host_url}/connect/oauth2/token")
         response = requests.post(
             f"{self.host_url}/connect/oauth2/token",
             headers={

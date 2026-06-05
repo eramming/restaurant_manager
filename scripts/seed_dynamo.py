@@ -42,7 +42,7 @@ inventory = [
     },
     {
         "ingredient": "cheese",
-        "quantity": 5,
+        "quantity": 1,
         "unit": "lb",
         "latest_price": decimal(4.00),
         "expiration_date": "2026-06-12"
