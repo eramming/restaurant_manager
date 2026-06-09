@@ -1,9 +1,9 @@
 import os
 from uuid import uuid4
-from inventory_classes import Sale, MenuItem
+from inventory_classes import Sale
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_sqs.client import SQSClient
-from typing import Dict, List
+from typing import Dict
 import boto3
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
@@ -31,7 +31,7 @@ def handle_sale(request: Sale) -> dict:
 
         recipe: Dict[str, float] = get_recipe(dish_name)
         update_inventory(recipe, amount)
-    record_sales(request.order)
+        record_sale(dish_name, amount)
     send_sale_msg()
 
     return {
@@ -91,22 +91,26 @@ def dynamo_update(ingr_key: str, total_used: float) -> None:
             detail=f"Failed to update inventory for ingredient: {ingr_key}",
         )
 
-def record_sales(order: List[MenuItem]) -> None:
+def record_sale(dish_name: str, amount: int) -> None:
     now: datetime = datetime.now(timezone.utc)
     day_of_wk: str = now.strftime("%A").lower()
-    with sales_table.batch_writer() as batch:
-        for item in order:
-            sale_id: str = str(uuid4())
-            batch.put_item(
-                Item={
-                    'sale_id': sale_id,
-                    'dish': item.name,
-                    'amount': item.quantity_sold,
-                    'dayOfWeek': day_of_wk,
-                    'date': now.strftime("%Y-%m-%d")
-                }
-            )
-            LOG.info(f"Saved sale id={sale_id}, dish={item.name} to database.")
+    sale_id: str = str(uuid4())
+    try:
+        sales_table.put_item(Item={
+            'sale_id': sale_id,
+            'dish': dish_name,
+            'amount': amount,
+            'dayOfWeek': day_of_wk,
+            'date': now.strftime("%Y-%m-%d")}
+        )
+        LOG.info(f"Saved sale id={sale_id}, dish={dish_name} to database.")
+    except ClientError as e:
+        LOG.error(f"Failed to save sale {sale_id} for dish={dish_name}\n"
+                  f"{e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to  save sale {sale_id} for dish={dish_name}\n",
+        )
 
 
 def send_sale_msg() -> None:
