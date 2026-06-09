@@ -73,8 +73,7 @@ def dynamo_update(ingr_key: str, total_used: float) -> None:
             ),
             ExpressionAttributeValues={
                 ":used": total_used,
-            },
-            ReturnValues="None"
+            }
         )
         LOG.info(f"Subtracted {total_used} units from {ingr_key} in inventory.")
     except ClientError as e:
