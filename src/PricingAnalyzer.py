@@ -42,6 +42,7 @@ class PricingAnalyzer:
         report = []
 
         for ingredient, quantity in needed.items():
+            price_result = None
             price_result: PriceResult = self.kroger_client.price_of(ingredient)
             previous_price = self._get_previous_price(ingredient)
 
