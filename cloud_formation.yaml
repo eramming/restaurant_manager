@@ -21,6 +21,10 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0 # tighten this to your IP for real use
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: 0.0.0.0/0
 
   InventoryManagerInstance:
     Type: AWS::EC2::Instance
@@ -309,6 +313,21 @@ Resources:
       Tags:
         - Key: Service
           Value: InventoryManager
+
+  SupplyChangeQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${Environment}-supply-change-queue"
+
+      VisibilityTimeout: 30
+
+      MessageRetentionPeriod: 345600 # 4 days
+
+      ReceiveMessageWaitTimeSeconds: 20 # long polling
+
+      Tags:
+        - Key: Service
+          Value: InventoryManager
   
   PriceReportTopic:
     Type: AWS::SNS::Topic
@@ -402,6 +421,12 @@ Outputs:
 
   SupplyGapQueueArn:
     Value: !GetAtt SupplyGapQueue.Arn
+
+  SupplyChangeQueueUrl:
+    Value: !Ref SupplyChangeQueue
+
+  SupplyChangeQueueArn:
+    Value: !GetAtt SupplyChangeQueue.Arn
 
   PriceReportTopicArn:
     Description: SNS topic ARN for price report notifications

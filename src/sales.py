@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 from inventory_classes import Sale, MenuItem
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
+from mypy_boto3_sqs.client import SQSClient
 from typing import Dict, List
 import boto3
 from botocore.exceptions import ClientError
@@ -14,11 +15,13 @@ LOG: Logger = getLogger(__name__)
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
 SALES_TABLE = os.getenv("SALES_TABLE", "dev-Sales")
+SUPPLY_CHANGE_QUEUE = os.getenv("SUPPLY_CHANGE_QUEUE_URL", "dev-supply-change-queue")
 
 dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
 inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
 menu_table: Table = dynamodb.Table(MENU_TABLE)
 sales_table: Table = dynamodb.Table(SALES_TABLE)
+sqs_client: SQSClient = boto3.client("sqs")
 
 
 def handle_sale(request: Sale) -> dict:
@@ -29,6 +32,7 @@ def handle_sale(request: Sale) -> dict:
         recipe: Dict[str, float] = get_recipe(dish_name)
         update_inventory(recipe, amount)
     record_sales(request.order)
+    send_sale_msg()
 
     return {
         "message": "Sales handled successfully",
@@ -100,3 +104,10 @@ def record_sales(order: List[MenuItem]) -> None:
                 }
             )
             LOG.info(f"Saved sale id={sale_id}, dish={dish} to database.")
+
+
+def send_sale_msg() -> None:
+    sqs_client.send_message(
+        QueueUrl=SUPPLY_CHANGE_QUEUE,
+        MessageBody="SOLD_MENU_ITEM"
+    )

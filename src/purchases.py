@@ -2,6 +2,7 @@ import os
 import boto3
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from fastapi import HTTPException
+from mypy_boto3_sqs.client import SQSClient
 from botocore.exceptions import ClientError
 from inventory_classes import PurchasedIngrs
 from logging import Logger, getLogger
@@ -9,9 +10,11 @@ from logging import Logger, getLogger
 LOG: Logger = getLogger(__name__)
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
+SUPPLY_CHANGE_QUEUE = os.getenv("SUPPLY_CHANGE_QUEUE_URL", "dev-supply-change-queue")
 
 dynamodb: DynamoDBServiceResource = boto3.resource("dynamodb")
 inventory_table: Table = dynamodb.Table(INVENTORY_TABLE)
+sqs_client: SQSClient = boto3.client("sqs")
 
 
 def handle_new_purchases(purchase: PurchasedIngrs):
@@ -46,7 +49,14 @@ def handle_new_purchases(purchase: PurchasedIngrs):
                       f"{e.response['Error']['Message']}")
             raise HTTPException(status_code=500, detail=f"Failed to update ingredient: {ingr_key}\n"
                                 f"{e.response['Error']['Message']}")
-
+    
+    send_purchase_msg()
     return {
         "message": "Purchased ingredients added successfully"
     }
+
+def send_purchase_msg() -> None:
+    sqs_client.send_message(
+        QueueUrl=SUPPLY_CHANGE_QUEUE,
+        MessageBody="NEW_INGR_PURCHASE"
+    )
