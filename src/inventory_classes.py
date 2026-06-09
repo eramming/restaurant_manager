@@ -13,7 +13,7 @@ class MenuItem(BaseModel):
 
 class PurchasedIngredient(BaseModel):
     ingredient: str
-    quantity: Decimal = Field(gt=0)
+    quantity: Decimal = Field(ge=0)
     unit: str
     expiration_date: date | None = None
     latest_price: Decimal = Field(gt=0)

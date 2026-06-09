@@ -54,7 +54,6 @@ class PricingAnalyzer:
                     (price_difference / previous_price) * Decimal("100")
                 )
 
-            self._update_latest_price(ingredient, price_result.unit_price)
             report.append(
                 {
                     "ingredient": ingredient,
@@ -105,15 +104,6 @@ class PricingAnalyzer:
             return None
 
         return Decimal(str(previous_price))
-
-    def _update_latest_price(self, ingredient: str, unit_price: Decimal) -> None:
-        self.inventory_table.update_item(
-            Key={"ingredient": ingredient},
-            UpdateExpression="SET latest_price = :price",
-            ExpressionAttributeValues={
-                ":price": unit_price,
-            }
-        )
 
     def _send_sns_message(self, subject: str, message: dict[str, Any]) -> str:
         response = self.sns.publish(

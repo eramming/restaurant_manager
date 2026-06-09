@@ -80,7 +80,7 @@ inventory = [
 sale_history = []
 date = today - timedelta(days=28)
 while date != today:
-    sales_per_day: int = random.randint(0, 4)
+    sales_per_day: int = random.randint(2, 6)
     for sale in range(sales_per_day):
         dish: str = random.choice(["spaghetti", "pizza", "italian_sub"])
         sale_history.append({
