@@ -1,22 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
 
-# Install github ssh stuff:
-mkdir -p $HOME/.ssh
-touch $HOME/.ssh/id_ed25519
-chmod 600 $HOME/.ssh/id_ed25519
-
-cat > $HOME/.ssh/config <<'EOF'
-Host github.com
-    IdentityFile /home/ec2-user/.ssh/id_ed25519
-    IdentitiesOnly yes
-EOF
-
-chmod 600 $HOME/.ssh/config
-
-ssh-keyscan github.com >> $HOME/.ssh/known_hosts
-chmod 644 $HOME/.ssh/known_hosts
-
 echo "Installing uv..."
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
