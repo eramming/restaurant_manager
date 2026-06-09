@@ -79,10 +79,14 @@ def dynamo_update(ingr_key: str, total_used: float) -> None:
         LOG.info(f"Subtracted {total_used} units from {ingr_key} in inventory.")
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            LOG.error(f"Not enough inventory for ingredient: {ingr_key}\n"
+                      f"{e.response['Error']['Message']}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Not enough inventory for ingredient: {ingr_key}",
             )
+        LOG.error(f"Failed to update inventory for ingredient: {ingr_key}\n"
+                      f"{e.response['Error']['Message']}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to update inventory for ingredient: {ingr_key}",
