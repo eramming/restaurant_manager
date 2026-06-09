@@ -39,9 +39,10 @@ def handle_new_purchases(purchase: PurchasedIngrs):
                 ExpressionAttributeValues=expression_values
             )
             LOG.info(f"Added {ingredient.quantity} units of {ingr_key} to inventory.")
-        except ClientError:
+        except ClientError as e:
             LOG.error(f"Failed to update ingredient: {ingr_key} with params {expression_values}.")
-            raise HTTPException(status_code=500, detail=f"Failed to update ingredient: {ingr_key}")
+            raise HTTPException(status_code=500, detail=f"Failed to update ingredient: {ingr_key}\n"
+                                f"{e.response['Error']['Message']}")
 
     return {
         "message": "Purchased ingredients added successfully"
