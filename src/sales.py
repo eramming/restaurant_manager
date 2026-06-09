@@ -49,11 +49,11 @@ def get_recipe(name: str) -> Dict[str, float]:
     if not item:
         raise HTTPException(status_code=404, detail=f"Menu item not found: {name}")
 
-    ingredients = item.get("ingredients")
-    if not ingredients:
-        raise HTTPException(status_code=400, detail=f"Menu item has no listed ingredients: {name}")
+    recipe = item.get("recipe")
+    if not recipe:
+        raise HTTPException(status_code=400, detail=f"Menu item has no listed recipe: {name}")
 
-    return ingredients
+    return recipe
 
 
 def update_inventory(recipe: Dict[str, float], quantity_sold: int) -> None:
