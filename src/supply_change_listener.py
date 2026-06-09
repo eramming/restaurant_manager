@@ -12,7 +12,7 @@ logging.basicConfig(
     force=True
 )
 LOG: Logger = getLogger(__name__)
-LOG.info("New Purchase Listener starting...")
+LOG.info("Supply Change Listener starting...")
 
 SUPPLY_CHANGE_QUEUE: str = os.getenv("SUPPLY_CHANGE_QUEUE_URL", "dev-supply-change-queue")
 sqs: SQSClient = boto3.client("sqs")

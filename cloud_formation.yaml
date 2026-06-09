@@ -280,7 +280,9 @@ Resources:
                 Effect: Allow
                 Action:
                   - sqs:*
-                Resource: !GetAtt SupplyGapQueue.Arn
+                Resource: 
+                  - !GetAtt SupplyGapQueue.Arn
+                  - !GetAtt SupplyChangeQueue.Arn
 
               - Sid: SnsAccess
                 Effect: Allow
