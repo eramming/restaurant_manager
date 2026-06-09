@@ -4,7 +4,9 @@ from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from fastapi import HTTPException
 from botocore.exceptions import ClientError
 from inventory_classes import PurchasedIngrs
+from logging import Logger, getLogger
 
+LOG: Logger = getLogger(__name__)
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 
@@ -36,6 +38,7 @@ def handle_new_purchases(purchase: PurchasedIngrs):
                     ":latest_price": ingredient.latest_price
                 }
             )
+            LOG.info(f"Added {ingredient.quantity} units of {ingr_key} to inventory.")
         except ClientError:
             raise HTTPException(status_code=500, detail=f"Failed to update ingredient: {ingr_key}")
 

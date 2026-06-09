@@ -7,7 +7,9 @@ import boto3
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
 from datetime import datetime, timezone
+from logging import Logger, getLogger
 
+LOG: Logger = getLogger(__name__)
 
 INVENTORY_TABLE = os.getenv("INVENTORY_TABLE", "dev-Inventory")
 MENU_TABLE = os.getenv("MENU_TABLE", "dev-Menu")
@@ -70,6 +72,7 @@ def dynamo_update(ingr_key: str, total_used: float) -> None:
             },
             ReturnValues="None"
         )
+        LOG.info(f"Subtracted {total_used} units from {ingr_key} in inventory.")
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             raise HTTPException(
@@ -96,3 +99,4 @@ def record_sales(order: List[MenuItem]) -> None:
                     'date': now.strftime("%Y-%m-%d")
                 }
             )
+            LOG.info(f"Saved sale id={sale_id}, dish={dish} to database.")
