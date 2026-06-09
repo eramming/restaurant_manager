@@ -53,38 +53,6 @@ Resources:
 
           dnf update -y
           dnf install -y git awscli
-
-          mkdir -p /root/.ssh
-          cat > /root/.ssh/id_ed25519 <<'EOF'
-          -----BEGIN OPENSSH PRIVATE KEY-----
-          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
-          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
-          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
-          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
-          -----END OPENSSH PRIVATE KEY-----
-          EOF
-          chmod 700 /root/.ssh
-          chmod 600 /root/.ssh/id_ed25519
-          ssh-keyscan github.com >> /root/.ssh/known_hosts
-          chmod 644 /root/.ssh/known_hosts
-          cat > /root/.ssh/config <<EOF
-          Host github.com
-            IdentityFile /root/.ssh/id_ed25519
-            IdentitiesOnly yes
-          EOF
-          chmod 600 /root/.ssh/config
-
-          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
-          cd /opt/restaurant_manager
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="/root/.local/bin:$PATH"
-          uv python install 3.14
-          uv venv --python 3.14
-          uv sync
-
-          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
-          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
           
 
   SupplyGapAnalyzerInstance:
@@ -114,38 +82,6 @@ Resources:
 
           dnf update -y
           dnf install -y git awscli
-
-          mkdir -p /root/.ssh
-          cat > /root/.ssh/id_ed25519 <<'EOF'
-          -----BEGIN OPENSSH PRIVATE KEY-----
-          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
-          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
-          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
-          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
-          -----END OPENSSH PRIVATE KEY-----
-          EOF
-          chmod 700 /root/.ssh
-          chmod 600 /root/.ssh/id_ed25519
-          ssh-keyscan github.com >> /root/.ssh/known_hosts
-          chmod 644 /root/.ssh/known_hosts
-          cat > /root/.ssh/config <<EOF
-          Host github.com
-            IdentityFile /root/.ssh/id_ed25519
-            IdentitiesOnly yes
-          EOF
-          chmod 600 /root/.ssh/config
-
-          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
-          cd /opt/restaurant_manager
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="/root/.local/bin:$PATH"
-          uv python install 3.14
-          uv venv --python 3.14
-          uv sync
-
-          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
-          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
 
   PricingAnalyzerInstance:
     Type: AWS::EC2::Instance
@@ -177,38 +113,6 @@ Resources:
 
           dnf update -y
           dnf install -y git awscli
-
-          mkdir -p /root/.ssh
-          cat > /root/.ssh/id_ed25519 <<'EOF'
-          -----BEGIN OPENSSH PRIVATE KEY-----
-          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-          QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
-          UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
-          AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
-          3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
-          -----END OPENSSH PRIVATE KEY-----
-          EOF
-          chmod 700 /root/.ssh
-          chmod 600 /root/.ssh/id_ed25519
-          ssh-keyscan github.com >> /root/.ssh/known_hosts
-          chmod 644 /root/.ssh/known_hosts
-          cat > /root/.ssh/config <<EOF
-          Host github.com
-            IdentityFile /root/.ssh/id_ed25519
-            IdentitiesOnly yes
-          EOF
-          chmod 600 /root/.ssh/config
-
-          git clone git@github.com:eramming/restaurant_manager.git /opt/restaurant_manager
-          cd /opt/restaurant_manager
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="/root/.local/bin:$PATH"
-          uv python install 3.14
-          uv venv --python 3.14
-          uv sync
-
-          git clone git@github.com:eramming/restaurant_manager.git /home/ec2-user/restaurant-manager
-          chown -R ec2-user:ec2-user /home/ec2-user/restaurant_manager
 
   InventoryTable:
     Type: AWS::DynamoDB::Table

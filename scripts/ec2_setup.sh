@@ -3,16 +3,7 @@ set -euxo pipefail
 
 # Install github ssh stuff:
 mkdir -p $HOME/.ssh
-cat > $HOME/.ssh/id_ed25519 <<'EOF'
------BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qAAAAJgoHrNSKB6z
-UgAAAAtzc2gtZWQyNTUxOQAAACCKc3alll1Fe8APVbSiryHhrt3awloIqqIoeRJtRG/0qA
-AAAEC6Iv71Ca5FkgQ6xhsi0ZkG/h8WYsCe5ttvIhrYNg214YpzdqWWXUV7wA9VtKKvIeGu
-3drCWgiqoih5Em1Eb/SoAAAAD2VyYW1taW4yQGpoLmVkdQECAwQFBg==
------END OPENSSH PRIVATE KEY-----
-EOF
-
+touch $HOME/.ssh/id_ed25519
 chmod 600 $HOME/.ssh/id_ed25519
 
 cat > $HOME/.ssh/config <<'EOF'
