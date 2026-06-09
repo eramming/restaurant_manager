@@ -106,7 +106,7 @@ def record_sales(order: List[MenuItem]) -> None:
                     'date': now.strftime("%Y-%m-%d")
                 }
             )
-            LOG.info(f"Saved sale id={sale_id}, dish={dish} to database.")
+            LOG.info(f"Saved sale id={sale_id}, dish={dish['name']} to database.")
 
 
 def send_sale_msg() -> None:
