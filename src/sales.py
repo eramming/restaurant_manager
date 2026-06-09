@@ -95,18 +95,18 @@ def record_sales(order: List[MenuItem]) -> None:
     now: datetime = datetime.now(timezone.utc)
     day_of_wk: str = now.strftime("%A").lower()
     with sales_table.batch_writer() as batch:
-        for dish, amount in order:
+        for item in order:
             sale_id: str = str(uuid4())
             batch.put_item(
                 Item={
                     'sale_id': sale_id,
-                    'dish': dish,
-                    'amount': amount,
+                    'dish': item.name,
+                    'amount': item.quantity_sold,
                     'dayOfWeek': day_of_wk,
                     'date': now.strftime("%Y-%m-%d")
                 }
             )
-            LOG.info(f"Saved sale id={sale_id}, dish={dish['name']} to database.")
+            LOG.info(f"Saved sale id={sale_id}, dish={item.name} to database.")
 
 
 def send_sale_msg() -> None:
