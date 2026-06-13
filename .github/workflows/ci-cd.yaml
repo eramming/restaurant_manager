@@ -32,17 +32,27 @@ jobs:
 
       - name: Build and push SalesInventoryManager
         run: |
-          docker build -t $ECR_REGISTRY/sales-inventory-manager:${{ github.sha }} ./SalesInventoryManager
+          docker build \
+            -f sales_inventory_manager/Dockerfile \
+            -t $ECR_REGISTRY/sales-inventory-manager:${{ github.sha }} \
+            .
           docker push $ECR_REGISTRY/sales-inventory-manager:${{ github.sha }}
 
       - name: Build and push SupplyGapAnalyzer
         run: |
-          docker build -t $ECR_REGISTRY/supply-gap-analyzer:${{ github.sha }} ./SupplyGapAnalyzer
+          docker build \
+            -f supply_gap_analyzer/Dockerfile \
+            -t $ECR_REGISTRY/supply-gap-analyzer:${{ github.sha }} \
+            .
           docker push $ECR_REGISTRY/supply-gap-analyzer:${{ github.sha }}
 
       - name: Build and push PricingAnalyzer
         run: |
           docker build -t $ECR_REGISTRY/pricing-analyzer:${{ github.sha }} ./PricingAnalyzer
+          docker build \
+            -f pricing_analyzer/Dockerfile \
+            -t $ECR_REGISTRY/pricing-analyzer:${{ github.sha }} \
+            .
           docker push $ECR_REGISTRY/pricing-analyzer:${{ github.sha }}
 
       - name: Configure kubectl
