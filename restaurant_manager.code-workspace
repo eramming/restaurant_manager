@@ -1,0 +1,27 @@
+{
+  "folders": [
+    {
+      "name": "riis-root",
+      "path": "."
+    },
+    {
+      "name": "pricing_analyzer",
+      "path": "pricing_analyzer"
+    },
+    {
+      "name": "sales_inventory_manager",
+      "path": "sales_inventory_manager"
+    },
+    {
+      "name": "supply_gap_analyzer",
+      "path": "supply_gap_analyzer"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "pricing_analyzer": true,
+      "sales_inventory_manager": true,
+      "supply_gap_analyzer": true
+    }
+  }
+}

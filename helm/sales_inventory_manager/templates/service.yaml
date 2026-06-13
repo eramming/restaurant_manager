@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sales_inventory_manager.fullname" . }}
+  labels:
+    {{- include "sales_inventory_manager.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "sales_inventory_manager.selectorLabels" . | nindent 4 }}

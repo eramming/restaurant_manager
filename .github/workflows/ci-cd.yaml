@@ -63,11 +63,9 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          kubectl set image deployment/sales-inventory-manager \
-            sales-inventory-manager=$ECR_REGISTRY/sales-inventory-manager:${{ github.sha }}
-
-          kubectl set image deployment/supply-gap-analyzer \
-            supply-gap-analyzer=$ECR_REGISTRY/supply-gap-analyzer:${{ github.sha }}
-
-          kubectl set image deployment/pricing-analyzer \
-            pricing-analyzer=$ECR_REGISTRY/pricing-analyzer:${{ github.sha }}
+          helm upgrade --install sales_inventory_manager ./helm/sales_inventory_manager \
+            --set image.tag=${{ github.sha }}
+          helm upgrade --install supply_gap_analyzer ./helm/supply_gap_analyzer \
+            --set image.tag=${{ github.sha }}
+          helm upgrade --install pricing_analyzer ./helm/pricing_analyzer \
+            --set image.tag=${{ github.sha }}
