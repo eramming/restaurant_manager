@@ -7,7 +7,7 @@ from mypy_boto3_sqs.client import SQSClient
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from DemandForecaster import DemandForecaster
 import boto3
-from inventory_classes import PurchasedIngredient
+from models.inventory_classes import PurchasedIngredient
 from typing import List
 from datetime import date
 from logging import Logger, getLogger
