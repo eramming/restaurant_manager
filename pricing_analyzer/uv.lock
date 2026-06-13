@@ -122,6 +122,7 @@ dependencies = [
     { name = "boto3" },
     { name = "boto3-stubs", extra = ["dynamodb", "sns", "sqs"] },
     { name = "botocore" },
+    { name = "restaurant-models" },
 ]
 
 [package.metadata]
@@ -129,7 +130,13 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.43.14" },
     { name = "boto3-stubs", extras = ["dynamodb", "sns", "sqs"], specifier = ">=1.43.14" },
     { name = "botocore", specifier = ">=1.43.14" },
+    { name = "restaurant-models", directory = "../models" },
 ]
+
+[[package]]
+name = "restaurant-models"
+version = "0.1.0"
+source = { directory = "../models" }
 
 [[package]]
 name = "s3transfer"

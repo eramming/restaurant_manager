@@ -4,7 +4,7 @@ from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from fastapi import HTTPException
 from mypy_boto3_sqs.client import SQSClient
 from botocore.exceptions import ClientError
-from models.src.restaurant_models.inventory_classes import PurchasedIngrs
+from restaurant_models.inventory_classes import PurchasedIngrs
 from logging import Logger, getLogger
 
 LOG: Logger = getLogger(__name__)

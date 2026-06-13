@@ -652,6 +652,7 @@ dependencies = [
     { name = "botocore" },
     { name = "fastapi", extra = ["standard"] },
     { name = "requests" },
+    { name = "restaurant-models" },
 ]
 
 [package.metadata]
@@ -661,7 +662,13 @@ requires-dist = [
     { name = "botocore", specifier = ">=1.43.14" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
     { name = "requests", specifier = ">=2.34.2" },
+    { name = "restaurant-models", directory = "../models" },
 ]
+
+[[package]]
+name = "restaurant-models"
+version = "0.1.0"
+source = { directory = "../models" }
 
 [[package]]
 name = "rich"

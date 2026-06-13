@@ -1,6 +1,6 @@
 import os
 from uuid import uuid4
-from models.src.restaurant_models.inventory_classes import Sale
+from restaurant_models.inventory_classes import Sale
 from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource, Table
 from mypy_boto3_sqs.client import SQSClient
 from typing import Dict
