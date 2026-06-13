@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import os
 from sales import handle_sale
 from purchases import handle_new_purchases
-from models.inventory_classes import Sale, PurchasedIngrs
+from models.src.restaurant_models.inventory_classes import Sale, PurchasedIngrs
 import logging
 from logging import getLogger, Logger
 

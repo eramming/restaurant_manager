@@ -5,6 +5,10 @@
       "path": "."
     },
     {
+      "name": "models",
+      "path": "models"
+    },
+    {
       "name": "pricing_analyzer",
       "path": "pricing_analyzer"
     },
@@ -19,6 +23,7 @@
   ],
   "settings": {
     "files.exclude": {
+      "models": true,
       "pricing_analyzer": true,
       "sales_inventory_manager": true,
       "supply_gap_analyzer": true
