@@ -7,7 +7,7 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/sales-inventory-manager
+  repository: 929170595454.dkr.ecr.us-east-2.amazonaws.com/riis/sales-inventory-manager
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
