@@ -45,6 +45,16 @@ spec:
             - name: {{ $name }}
               value: {{ $value | quote }}
           {{- end }}
+            - name: KROGER_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.krogerSecret.name }}
+                  key: {{ .Values.krogerSecret.clientIdKey }}
+            - name: KROGER_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.krogerSecret.name }}
+                  key: {{ .Values.krogerSecret.clientSecretKey }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

@@ -19,6 +19,7 @@ env:
   INVENTORY_TABLE: dev-Inventory
   MENU_TABLE: dev-Menu
   SALES_TABLE: dev-Sales
+  SUPPLY_CHANGE_QUEUE_URL: https://sqs.us-east-2.amazonaws.com/929170595454/dev-supply-change-queue
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []

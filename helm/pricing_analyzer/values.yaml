@@ -16,10 +16,17 @@ image:
 env:
   LOG_LEVEL: info
   AWS_REGION: us-east-2
-  KROGER_LOCATION_ID: 09700021
+  KROGER_LOCATION_ID: "09700021"
   INVENTORY_TABLE: dev-Inventory
   MENU_TABLE: dev-Menu
   SALES_TABLE: dev-Sales
+  PRICE_REPORT_SNS_ARN: arn:aws:sns:us-east-2:929170595454:dev-pricing-report-topic
+  SUPPLY_GAP_QUEUE_URL: https://sqs.us-east-2.amazonaws.com/929170595454/dev-supply-gap-queue
+
+krogerSecret:
+  name: kroger-api-credentials
+  clientIdKey: KROGER_CLIENT_ID
+  clientSecretKey: KROGER_CLIENT_SECRET
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
